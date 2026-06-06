@@ -1,0 +1,2011 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KMS — โรงงานกระดาษคราฟท์</title>
+<style>
+  @import url('data:text/css,');
+
+  :root {
+    --kraft-dark: #1a1208;
+    --kraft-brown: #3d2b0e;
+    --kraft-mid: #7a4f1e;
+    --kraft-tan: #c48b3a;
+    --kraft-gold: #e8a830;
+    --kraft-paper: #f5e6c8;
+    --kraft-light: #fdf4e3;
+    --kraft-fiber: #d4b896;
+    --accent-teal: #2a7a6f;
+    --accent-teal-light: #3aafa0;
+    --accent-red: #c0392b;
+    --accent-green: #27ae60;
+    --accent-blue: #2980b9;
+    --accent-orange: #e67e22;
+    --text-primary: #1a1208;
+    --text-secondary: #5a3e20;
+    --text-muted: #8a6940;
+    --shadow-heavy: 0 8px 32px rgba(26,18,8,0.25);
+    --shadow-mid: 0 4px 16px rgba(26,18,8,0.15);
+    --shadow-light: 0 2px 8px rgba(26,18,8,0.08);
+    --radius: 12px;
+    --radius-lg: 20px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Georgia', 'Sarabun', serif;
+    background: var(--kraft-dark);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ---- PAPER TEXTURE BACKGROUND ---- */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 2px,
+        rgba(196,139,58,0.03) 2px,
+        rgba(196,139,58,0.03) 4px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(196,139,58,0.02) 3px,
+        rgba(196,139,58,0.02) 6px
+      );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ---- HEADER ---- */
+  .site-header {
+    background: linear-gradient(135deg, var(--kraft-dark) 0%, var(--kraft-brown) 60%, var(--kraft-mid) 100%);
+    border-bottom: 3px solid var(--kraft-gold);
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header-fiber {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.4;
+  }
+
+  .header-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px 24px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .header-icon {
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
+  }
+
+  .header-text h1 {
+    font-family: 'Georgia', serif;
+    font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+    font-weight: 700;
+    color: var(--kraft-gold);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .header-text .subtitle {
+    color: var(--kraft-fiber);
+    font-size: 0.9rem;
+    margin-top: 4px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-style: italic;
+  }
+
+  .header-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .badge {
+    background: rgba(232,168,48,0.15);
+    border: 1px solid rgba(232,168,48,0.4);
+    color: var(--kraft-gold);
+    font-size: 0.72rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* ---- NAV TABS ---- */
+  .nav-tabs {
+    background: var(--kraft-brown);
+    border-bottom: 2px solid var(--kraft-mid);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .nav-tabs::-webkit-scrollbar { display: none; }
+
+  .nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    gap: 0;
+    padding: 0 16px;
+  }
+
+  .nav-tab {
+    background: none;
+    border: none;
+    color: var(--kraft-fiber);
+    font-family: 'Georgia', serif;
+    font-size: 0.85rem;
+    padding: 14px 18px;
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .nav-tab:hover { color: var(--kraft-gold); }
+
+  .nav-tab.active {
+    color: var(--kraft-gold);
+    border-bottom-color: var(--kraft-gold);
+    background: rgba(232,168,48,0.08);
+  }
+
+  /* ---- MAIN CONTENT ---- */
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px 20px 60px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ---- SECTIONS ---- */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ---- OVERVIEW CARDS ---- */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: linear-gradient(135deg, var(--kraft-paper), var(--kraft-light));
+    border-radius: var(--radius);
+    padding: 20px;
+    border-left: 4px solid var(--kraft-tan);
+    box-shadow: var(--shadow-mid);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-heavy);
+  }
+
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    right: -10px;
+    top: -10px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(196,139,58,0.1);
+  }
+
+  .stat-num {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--kraft-mid);
+    line-height: 1;
+  }
+
+  .stat-label {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  .stat-icon {
+    position: absolute;
+    right: 14px;
+    top: 14px;
+    opacity: 0.25;
+    font-size: 1.8rem;
+  }
+
+  /* ---- SECTION TITLE ---- */
+  .sec-title {
+    font-family: 'Georgia', serif;
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    color: var(--kraft-gold);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sec-desc {
+    color: var(--kraft-fiber);
+    font-size: 0.88rem;
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+
+  /* ---- KNOWLEDGE CARDS ---- */
+  .knowledge-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 18px;
+  }
+
+  .k-card {
+    background: var(--kraft-paper);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-mid);
+    cursor: pointer;
+    transition: all 0.25s;
+    border: 1px solid rgba(196,139,58,0.3);
+  }
+
+  .k-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-heavy);
+    border-color: var(--kraft-tan);
+  }
+
+  .k-card-header {
+    padding: 16px 18px 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .k-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+
+  .k-card-title {
+    font-weight: 700;
+    color: var(--kraft-dark);
+    font-size: 0.95rem;
+    line-height: 1.3;
+  }
+
+  .k-card-type {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+  }
+
+  .k-card-body {
+    padding: 0 18px 14px;
+    border-top: 1px solid rgba(196,139,58,0.2);
+    margin-top: 4px;
+  }
+
+  .k-card-items {
+    list-style: none;
+    margin-top: 10px;
+  }
+
+  .k-card-items li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.83rem;
+    color: var(--text-secondary);
+    padding: 4px 0;
+    border-bottom: 1px dashed rgba(196,139,58,0.15);
+  }
+
+  .k-card-items li:last-child { border-bottom: none; }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--kraft-tan);
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+
+  .risk-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    padding: 3px 9px;
+    border-radius: 20px;
+    margin-top: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .risk-high { background: #fde8e8; color: #c0392b; }
+  .risk-med { background: #fef3e2; color: #e67e22; }
+  .risk-low { background: #e8f8f0; color: #27ae60; }
+
+  /* ---- STORAGE FORMAT SECTION ---- */
+  .format-table {
+    background: var(--kraft-paper);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-mid);
+    margin-bottom: 24px;
+  }
+
+  .format-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .format-table th {
+    background: var(--kraft-brown);
+    color: var(--kraft-gold);
+    font-size: 0.82rem;
+    padding: 12px 16px;
+    text-align: left;
+    font-family: 'Georgia', serif;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .format-table td {
+    padding: 12px 16px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    border-bottom: 1px solid rgba(196,139,58,0.18);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  .format-table tr:hover td { background: rgba(196,139,58,0.06); }
+  .format-table tr:last-child td { border-bottom: none; }
+
+  /* ---- PROCESS FLOW ---- */
+  .process-flow {
+    background: var(--kraft-paper);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-mid);
+    margin-bottom: 24px;
+  }
+
+  .flow-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .flow-step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    position: relative;
+    cursor: pointer;
+    padding: 14px;
+    border-radius: var(--radius);
+    transition: background 0.2s;
+  }
+
+  .flow-step:hover { background: rgba(196,139,58,0.08); }
+
+  .flow-step::before {
+    content: '';
+    position: absolute;
+    left: 35px;
+    top: 56px;
+    bottom: -14px;
+    width: 2px;
+    background: repeating-linear-gradient(
+      180deg,
+      var(--kraft-tan) 0,
+      var(--kraft-tan) 6px,
+      transparent 6px,
+      transparent 12px
+    );
+  }
+
+  .flow-step:last-child::before { display: none; }
+
+  .step-num {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--kraft-tan), var(--kraft-gold));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(196,139,58,0.4);
+    margin-top: 2px;
+  }
+
+  .step-content h4 {
+    color: var(--kraft-dark);
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .step-content p {
+    color: var(--text-secondary);
+    font-size: 0.83rem;
+    line-height: 1.6;
+  }
+
+  .step-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .tool-chip {
+    background: rgba(42,122,111,0.12);
+    color: var(--accent-teal);
+    border: 1px solid rgba(42,122,111,0.3);
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+  }
+
+  /* ---- MOTIVATION SECTION ---- */
+  .motivation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .motive-card {
+    background: var(--kraft-paper);
+    border-radius: var(--radius);
+    padding: 20px;
+    border-top: 4px solid;
+    box-shadow: var(--shadow-mid);
+    transition: transform 0.2s;
+    cursor: pointer;
+  }
+
+  .motive-card:hover { transform: translateY(-3px); }
+
+  .motive-card .m-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .motive-card h4 {
+    color: var(--kraft-dark);
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .motive-card p {
+    color: var(--text-secondary);
+    font-size: 0.83rem;
+    line-height: 1.6;
+  }
+
+  .motive-list {
+    list-style: none;
+    margin-top: 10px;
+  }
+
+  .motive-list li {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    padding: 4px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+  }
+
+  .check { color: var(--accent-green); font-weight: 700; margin-top: 1px; }
+
+  /* ---- KPI SECTION ---- */
+  .kpi-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .kpi-card {
+    background: var(--kraft-paper);
+    border-radius: var(--radius);
+    padding: 0;
+    overflow: hidden;
+    box-shadow: var(--shadow-mid);
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+
+  .kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-heavy);
+  }
+
+  .kpi-header {
+    padding: 14px 16px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .kpi-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .kpi-title {
+    font-weight: 700;
+    color: var(--kraft-dark);
+    font-size: 0.9rem;
+  }
+
+  .kpi-cat {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+  }
+
+  .kpi-body {
+    padding: 10px 16px 14px;
+    border-top: 1px solid rgba(196,139,58,0.2);
+  }
+
+  .kpi-metrics {
+    list-style: none;
+  }
+
+  .kpi-metrics li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px dashed rgba(196,139,58,0.15);
+    font-size: 0.82rem;
+  }
+
+  .kpi-metrics li:last-child { border-bottom: none; }
+
+  .kpi-metric-name { color: var(--text-secondary); }
+
+  .kpi-target {
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+  }
+
+  /* ---- BRAIN DRAIN RADAR ---- */
+  .radar-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+
+  @media (max-width: 700px) {
+    .radar-section { grid-template-columns: 1fr; }
+  }
+
+  .risk-panel {
+    background: var(--kraft-paper);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    box-shadow: var(--shadow-mid);
+  }
+
+  .risk-panel h3 {
+    font-family: 'Georgia', serif;
+    color: var(--kraft-dark);
+    margin-bottom: 14px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .risk-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .risk-label {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    width: 130px;
+    flex-shrink: 0;
+  }
+
+  .risk-bar-wrap {
+    flex: 1;
+    background: rgba(196,139,58,0.15);
+    border-radius: 6px;
+    height: 10px;
+    overflow: hidden;
+  }
+
+  .risk-bar {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 1s ease;
+  }
+
+  .risk-pct {
+    font-size: 0.78rem;
+    font-weight: 700;
+    width: 32px;
+    text-align: right;
+    color: var(--text-muted);
+  }
+
+  /* ---- MODAL ---- */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,18,8,0.75);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal-box {
+    background: var(--kraft-light);
+    border-radius: var(--radius-lg);
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(26,18,8,0.5);
+    border: 2px solid var(--kraft-tan);
+    animation: modalIn 0.28s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.85) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .modal-header {
+    background: linear-gradient(135deg, var(--kraft-brown), var(--kraft-mid));
+    padding: 18px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    position: sticky;
+    top: 0;
+  }
+
+  .modal-header h3 {
+    color: var(--kraft-gold);
+    font-family: 'Georgia', serif;
+    font-size: 1.1rem;
+    line-height: 1.3;
+  }
+
+  .modal-header p {
+    color: var(--kraft-fiber);
+    font-size: 0.8rem;
+    margin-top: 3px;
+  }
+
+  .modal-close {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-left: 12px;
+    transition: background 0.2s;
+  }
+
+  .modal-close:hover { background: rgba(255,255,255,0.3); }
+
+  .modal-body { padding: 22px; }
+
+  .modal-section { margin-bottom: 18px; }
+
+  .modal-section h4 {
+    color: var(--kraft-mid);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(196,139,58,0.25);
+  }
+
+  .modal-section p, .modal-section li {
+    color: var(--text-secondary);
+    font-size: 0.87rem;
+    line-height: 1.7;
+  }
+
+  .modal-section ul { padding-left: 18px; }
+
+  /* ---- ROADMAP ---- */
+  .roadmap {
+    background: var(--kraft-paper);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-mid);
+  }
+
+  .roadmap-phase {
+    display: flex;
+    gap: 0;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(196,139,58,0.2);
+    transition: background 0.2s;
+  }
+
+  .roadmap-phase:last-child { border-bottom: none; }
+  .roadmap-phase:hover { background: rgba(196,139,58,0.05); }
+
+  .phase-marker {
+    width: 80px;
+    min-width: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 16px 10px;
+    background: rgba(196,139,58,0.08);
+    border-right: 1px solid rgba(196,139,58,0.2);
+  }
+
+  .phase-num {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--kraft-tan);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .phase-timeline {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 4px;
+  }
+
+  .phase-content {
+    padding: 16px 18px;
+    flex: 1;
+  }
+
+  .phase-content h4 {
+    color: var(--kraft-dark);
+    font-size: 0.92rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .phase-tasks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .task-tag {
+    font-size: 0.75rem;
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-weight: 500;
+  }
+
+  /* ---- FOOTER ---- */
+  .section-footer {
+    margin-top: 12px;
+    padding: 12px 16px;
+    background: rgba(196,139,58,0.08);
+    border-radius: var(--radius);
+    border-left: 3px solid var(--kraft-tan);
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 600px) {
+    .header-inner { flex-direction: column; }
+    .knowledge-grid { grid-template-columns: 1fr; }
+    .kpi-container { grid-template-columns: 1fr; }
+    .motivation-grid { grid-template-columns: 1fr; }
+    .format-table { overflow-x: auto; }
+    .format-table table { min-width: 500px; }
+    .phase-marker { width: 60px; min-width: 60px; }
+  }
+
+  /* ---- SCROLL REVEAL ---- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ---- PULSE ---- */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .pulse { animation: pulse 2s infinite; }
+
+  /* ---- PRINT ---- */
+  @media print {
+    .nav-tabs, .modal-overlay { display: none !important; }
+    .section { display: block !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-fiber"></div>
+  <div class="header-inner">
+    <svg class="header-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="4" y="8" width="38" height="48" rx="3" fill="#7a4f1e" stroke="#e8a830" stroke-width="1.5"/>
+      <rect x="10" y="16" width="26" height="3" rx="1.5" fill="#e8a830" opacity="0.7"/>
+      <rect x="10" y="23" width="20" height="2" rx="1" fill="#e8a830" opacity="0.45"/>
+      <rect x="10" y="29" width="24" height="2" rx="1" fill="#e8a830" opacity="0.45"/>
+      <rect x="10" y="35" width="18" height="2" rx="1" fill="#e8a830" opacity="0.45"/>
+      <rect x="10" y="41" width="22" height="2" rx="1" fill="#e8a830" opacity="0.45"/>
+      <circle cx="48" cy="42" r="14" fill="#2a7a6f"/>
+      <path d="M41 42l5 5 8-9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M28 8 L42 8 L42 20 Z" fill="#e8a830" opacity="0.5"/>
+    </svg>
+    <div class="header-text">
+      <h1>Knowledge Management System</h1>
+      <div class="subtitle">โรงงานกระดาษคราฟท์ — กลุ่มปฏิบัติการ</div>
+      <div class="header-badges">
+        <span class="badge">⚠ Brain Drain Risk</span>
+        <span class="badge">🏭 Manufacturing KM</span>
+        <span class="badge">📋 Operations Group</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="nav-tabs">
+  <div class="nav-inner">
+    <button class="nav-tab active" onclick="showSection('overview')">📊 ภาพรวม</button>
+    <button class="nav-tab" onclick="showSection('knowledge')">📚 Knowledge ที่ต้องจัดเก็บ</button>
+    <button class="nav-tab" onclick="showSection('storage')">🗂 รูปแบบการจัดเก็บ</button>
+    <button class="nav-tab" onclick="showSection('transfer')">🔄 Knowledge Transfer</button>
+    <button class="nav-tab" onclick="showSection('motivation')">🎯 แรงจูงใจ</button>
+    <button class="nav-tab" onclick="showSection('kpi')">📈 KPI</button>
+    <button class="nav-tab" onclick="showSection('roadmap')">🗺 Roadmap</button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- ========== OVERVIEW ========== -->
+  <section id="overview" class="section active">
+    <div class="overview-grid reveal">
+      <div class="stat-card" style="border-left-color:#c0392b">
+        <span class="stat-icon">🧠</span>
+        <div class="stat-num" style="color:#c0392b">6</div>
+        <div class="stat-label">ประเภท Knowledge<br>ที่เสี่ยงสูญหาย</div>
+      </div>
+      <div class="stat-card" style="border-left-color:#e67e22">
+        <span class="stat-icon">👷</span>
+        <div class="stat-num" style="color:#e67e22">4</div>
+        <div class="stat-label">กลุ่มช่างผู้เชี่ยวชาญ<br>เสี่ยง Brain Drain</div>
+      </div>
+      <div class="stat-card" style="border-left-color:#2a7a6f">
+        <span class="stat-icon">🔧</span>
+        <div class="stat-num" style="color:#2a7a6f">12</div>
+        <div class="stat-label">เครื่องมือ KM<br>แนะนำ</div>
+      </div>
+      <div class="stat-card" style="border-left-color:#2980b9">
+        <span class="stat-icon">📈</span>
+        <div class="stat-num" style="color:#2980b9">18</div>
+        <div class="stat-label">KPI ตัวชี้วัด<br>ความสำเร็จ</div>
+      </div>
+      <div class="stat-card" style="border-left-color:#8e44ad">
+        <span class="stat-icon">🗓</span>
+        <div class="stat-num" style="color:#8e44ad">4</div>
+        <div class="stat-label">เฟสการดำเนินงาน<br>(12 เดือน)</div>
+      </div>
+    </div>
+
+    <!-- RISK PANEL -->
+    <div class="radar-section reveal">
+      <div class="risk-panel">
+        <h3>⚠️ ระดับความเสี่ยง Brain Drain ตามกลุ่ม</h3>
+        <div id="riskBars"></div>
+      </div>
+      <div class="risk-panel">
+        <h3>📋 สาเหตุหลักของ Brain Drain</h3>
+        <div id="causeList"></div>
+      </div>
+    </div>
+
+    <!-- SVG DIAGRAM -->
+    <div class="risk-panel reveal" style="margin-bottom:20px">
+      <h3>🔍 ระบบนิเวศ KMS — โรงงานกระดาษคราฟท์</h3>
+      <div style="overflow-x:auto; margin-top:12px">
+        <svg viewBox="0 0 700 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:700px;display:block;margin:0 auto">
+          <defs>
+            <linearGradient id="gCentral" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#3d2b0e"/>
+              <stop offset="100%" style="stop-color:#7a4f1e"/>
+            </linearGradient>
+            <linearGradient id="gKnow" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#c0392b"/>
+              <stop offset="100%" style="stop-color:#e74c3c"/>
+            </linearGradient>
+            <linearGradient id="gStore" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#2980b9"/>
+              <stop offset="100%" style="stop-color:#3498db"/>
+            </linearGradient>
+            <linearGradient id="gTrans" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#2a7a6f"/>
+              <stop offset="100%" style="stop-color:#3aafa0"/>
+            </linearGradient>
+            <linearGradient id="gMotiv" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#e67e22"/>
+              <stop offset="100%" style="stop-color:#f39c12"/>
+            </linearGradient>
+            <marker id="arrowGold" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#e8a830"/>
+            </marker>
+          </defs>
+
+          <!-- Central node -->
+          <ellipse cx="350" cy="170" rx="75" ry="50" fill="url(#gCentral)" stroke="#e8a830" stroke-width="2"/>
+          <text x="350" y="164" text-anchor="middle" fill="#e8a830" font-size="11" font-weight="bold" font-family="Georgia, serif">KMS Core</text>
+          <text x="350" y="179" text-anchor="middle" fill="#c48b3a" font-size="9">กระดาษคราฟท์</text>
+
+          <!-- Node: Knowledge Capture -->
+          <ellipse cx="140" cy="80" rx="70" ry="36" fill="url(#gKnow)" stroke="#c0392b" stroke-width="1.5" opacity="0.9"/>
+          <text x="140" y="75" text-anchor="middle" fill="white" font-size="10" font-weight="bold">📚 รวบรวม</text>
+          <text x="140" y="89" text-anchor="middle" fill="#ffd0cc" font-size="9">Knowledge Capture</text>
+
+          <!-- Node: Storage -->
+          <ellipse cx="560" cy="80" rx="70" ry="36" fill="url(#gStore)" stroke="#2980b9" stroke-width="1.5" opacity="0.9"/>
+          <text x="560" y="75" text-anchor="middle" fill="white" font-size="10" font-weight="bold">🗂 จัดเก็บ</text>
+          <text x="560" y="89" text-anchor="middle" fill="#d0e8ff" font-size="9">Knowledge Storage</text>
+
+          <!-- Node: Transfer -->
+          <ellipse cx="140" cy="270" rx="70" ry="36" fill="url(#gTrans)" stroke="#2a7a6f" stroke-width="1.5" opacity="0.9"/>
+          <text x="140" y="265" text-anchor="middle" fill="white" font-size="10" font-weight="bold">🔄 ถ่ายทอด</text>
+          <text x="140" y="279" text-anchor="middle" fill="#c0f0e8" font-size="9">Knowledge Transfer</text>
+
+          <!-- Node: Motivation -->
+          <ellipse cx="560" cy="270" rx="70" ry="36" fill="url(#gMotiv)" stroke="#e67e22" stroke-width="1.5" opacity="0.9"/>
+          <text x="560" y="265" text-anchor="middle" fill="white" font-size="10" font-weight="bold">🎯 แรงจูงใจ</text>
+          <text x="560" y="279" text-anchor="middle" fill="#fff0d0" font-size="9">Motivation System</text>
+
+          <!-- Arrows -->
+          <line x1="208" y1="100" x2="282" y2="145" stroke="#e8a830" stroke-width="1.5" marker-end="url(#arrowGold)" stroke-dasharray="5,3"/>
+          <line x1="490" y1="100" x2="420" y2="145" stroke="#e8a830" stroke-width="1.5" marker-end="url(#arrowGold)" stroke-dasharray="5,3"/>
+          <line x1="282" y1="195" x2="208" y2="248" stroke="#e8a830" stroke-width="1.5" marker-end="url(#arrowGold)" stroke-dasharray="5,3"/>
+          <line x1="420" y1="195" x2="490" y2="248" stroke="#e8a830" stroke-width="1.5" marker-end="url(#arrowGold)" stroke-dasharray="5,3"/>
+
+          <!-- KPI label center bottom -->
+          <rect x="290" y="235" width="120" height="26" rx="8" fill="rgba(232,168,48,0.15)" stroke="#e8a830" stroke-width="1"/>
+          <text x="350" y="252" text-anchor="middle" fill="#e8a830" font-size="10" font-weight="bold">📈 KPI &amp; Roadmap</text>
+
+          <!-- Sub labels on arrows -->
+          <text x="235" y="118" fill="#c48b3a" font-size="8.5">บันทึก SOP</text>
+          <text x="434" y="118" fill="#c48b3a" font-size="8.5">เก็บใน Wiki</text>
+          <text x="195" y="228" fill="#c48b3a" font-size="8.5">Mentoring</text>
+          <text x="437" y="228" fill="#c48b3a" font-size="8.5">Reward</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="section-footer reveal">
+      💡 KMS นี้ออกแบบมาเพื่อรับมือกับความเสี่ยง Brain Drain จากกลุ่มปฏิบัติการโรงงานกระดาษคราฟท์ โดยเน้นการจัดเก็บ Tacit Knowledge ของช่างผู้เชี่ยวชาญ และสร้างกระบวนการถ่ายทอดที่ยั่งยืน
+    </div>
+  </section>
+
+  <!-- ========== KNOWLEDGE ========== -->
+  <section id="knowledge" class="section">
+    <div class="sec-title reveal">📚 Knowledge ที่ต้องจัดเก็บ</div>
+    <div class="sec-desc reveal">ความรู้สำคัญของกลุ่มปฏิบัติการที่เสี่ยงสูญหายเมื่อบุคลากรลาออกหรือเกษียณ</div>
+    <div class="knowledge-grid" id="knowledgeGrid"></div>
+    <div class="section-footer reveal" style="margin-top:20px">
+      📌 ลำดับความสำคัญ: ควรเริ่มต้นจัดเก็บ Tacit Knowledge ของช่างซ่อมบำรุงและผู้ควบคุมเครื่องก่อน เนื่องจากมีความเสี่ยงสูงสุดและใช้เวลาสร้างใหม่นานที่สุด
+    </div>
+  </section>
+
+  <!-- ========== STORAGE ========== -->
+  <section id="storage" class="section">
+    <div class="sec-title reveal">🗂 รูปแบบการจัดเก็บ Knowledge</div>
+    <div class="sec-desc reveal">เลือกรูปแบบที่เหมาะสมกับประเภทของ Knowledge และบริบทโรงงาน</div>
+    <div class="format-table reveal">
+      <table>
+        <thead>
+          <tr>
+            <th>ประเภท Knowledge</th>
+            <th>รูปแบบการจัดเก็บ</th>
+            <th>เครื่องมือ</th>
+            <th>ความถี่</th>
+          </tr>
+        </thead>
+        <tbody id="storageTable"></tbody>
+      </table>
+    </div>
+    <div class="sec-title reveal" style="margin-top:24px">🗄 สถาปัตยกรรมระบบจัดเก็บ</div>
+    <div class="risk-panel reveal">
+      <div style="overflow-x:auto">
+        <svg viewBox="0 0 660 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:660px;display:block;margin:0 auto">
+          <defs>
+            <linearGradient id="gLayer1" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#c0392b;stop-opacity:0.9"/>
+              <stop offset="100%" style="stop-color:#e74c3c;stop-opacity:0.9"/>
+            </linearGradient>
+            <linearGradient id="gLayer2" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#2980b9;stop-opacity:0.9"/>
+              <stop offset="100%" style="stop-color:#3498db;stop-opacity:0.9"/>
+            </linearGradient>
+            <linearGradient id="gLayer3" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#2a7a6f;stop-opacity:0.9"/>
+              <stop offset="100%" style="stop-color:#3aafa0;stop-opacity:0.9"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Layer 1: Input -->
+          <rect x="10" y="20" width="640" height="55" rx="10" fill="url(#gLayer1)"/>
+          <text x="330" y="40" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Georgia">📥  LAYER 1 — Knowledge Capture (ป้อนข้อมูล)</text>
+          <text x="80" y="60" text-anchor="middle" fill="#ffd0cc" font-size="9">SOP Form</text>
+          <text x="180" y="60" text-anchor="middle" fill="#ffd0cc" font-size="9">Video Record</text>
+          <text x="290" y="60" text-anchor="middle" fill="#ffd0cc" font-size="9">Interview Form</text>
+          <text x="400" y="60" text-anchor="middle" fill="#ffd0cc" font-size="9">Incident Report</text>
+          <text x="510" y="60" text-anchor="middle" fill="#ffd0cc" font-size="9">Expert Session</text>
+          <text x="600" y="60" text-anchor="middle" fill="#ffd0cc" font-size="9">Checklist</text>
+
+          <!-- Arrow -->
+          <line x1="330" y1="76" x2="330" y2="98" stroke="#e8a830" stroke-width="2" marker-end="url(#arrowGold)"/>
+
+          <!-- Layer 2: Processing -->
+          <rect x="10" y="100" width="640" height="55" rx="10" fill="url(#gLayer2)"/>
+          <text x="330" y="120" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Georgia">⚙️  LAYER 2 — Knowledge Repository (คลังความรู้)</text>
+          <text x="80" y="140" text-anchor="middle" fill="#d0e8ff" font-size="9">Wiki/Intranet</text>
+          <text x="190" y="140" text-anchor="middle" fill="#d0e8ff" font-size="9">Document Mgmt</text>
+          <text x="310" y="140" text-anchor="middle" fill="#d0e8ff" font-size="9">Video Library</text>
+          <text x="430" y="140" text-anchor="middle" fill="#d0e8ff" font-size="9">Lessons Learned DB</text>
+          <text x="570" y="140" text-anchor="middle" fill="#d0e8ff" font-size="9">Expert Directory</text>
+
+          <!-- Arrow -->
+          <line x1="330" y1="156" x2="330" y2="178" stroke="#e8a830" stroke-width="2" marker-end="url(#arrowGold)"/>
+
+          <!-- Layer 3: Output -->
+          <rect x="10" y="180" width="640" height="55" rx="10" fill="url(#gLayer3)"/>
+          <text x="330" y="200" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Georgia">📤  LAYER 3 — Knowledge Sharing (แบ่งปัน)</text>
+          <text x="90" y="220" text-anchor="middle" fill="#c0f0e8" font-size="9">Training Program</text>
+          <text x="210" y="220" text-anchor="middle" fill="#c0f0e8" font-size="9">Mentoring</text>
+          <text x="330" y="220" text-anchor="middle" fill="#c0f0e8" font-size="9">CoP Meeting</text>
+          <text x="450" y="220" text-anchor="middle" fill="#c0f0e8" font-size="9">Job Rotation</text>
+          <text x="570" y="220" text-anchor="middle" fill="#c0f0e8" font-size="9">e-Learning</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== TRANSFER ========== -->
+  <section id="transfer" class="section">
+    <div class="sec-title reveal">🔄 กระบวนการ Knowledge Transfer</div>
+    <div class="sec-desc reveal">กระบวนการและเครื่องมือถ่ายทอดความรู้จากผู้เชี่ยวชาญสู่บุคลากรรุ่นใหม่</div>
+    <div class="process-flow reveal">
+      <div class="flow-steps" id="transferSteps"></div>
+    </div>
+    <div class="sec-title reveal" style="margin-top:24px">🛠 เครื่องมือแนะนำ</div>
+    <div class="knowledge-grid" id="toolsGrid"></div>
+  </section>
+
+  <!-- ========== MOTIVATION ========== -->
+  <section id="motivation" class="section">
+    <div class="sec-title reveal">🎯 แรงจูงใจให้พนักงานแบ่งปันความรู้</div>
+    <div class="sec-desc reveal">กลยุทธ์สร้างแรงจูงใจทั้งด้านการเงินและที่ไม่ใช่การเงินเพื่อส่งเสริมวัฒนธรรม KM</div>
+    <div class="motivation-grid" id="motivGrid"></div>
+    <div class="section-footer reveal" style="margin-top:20px">
+      🏆 แนวทางที่ได้ผลดีที่สุดสำหรับโรงงาน: การผสมผสาน Recognition + เงินรางวัล + การพัฒนาสายอาชีพ โดยเน้น "การยอมรับในที่สาธารณะ" ซึ่งสร้างแรงกระตุ้นได้อย่างมีนัยสำคัญในกลุ่มช่างฝีมือ
+    </div>
+  </section>
+
+  <!-- ========== KPI ========== -->
+  <section id="kpi" class="section">
+    <div class="sec-title reveal">📈 KPI วัดความสำเร็จของ KM Program</div>
+    <div class="sec-desc reveal">ตัวชี้วัดครอบคลุม 4 มิติ: การจัดเก็บ / การถ่ายทอด / การนำไปใช้ / ผลลัพธ์ทางธุรกิจ</div>
+    <div class="kpi-container" id="kpiGrid"></div>
+
+    <!-- KPI GAUGE SVG -->
+    <div class="risk-panel reveal" style="margin-top:24px">
+      <h3>🎯 Dashboard เป้าหมาย KPI — ปีที่ 1</h3>
+      <div style="overflow-x:auto;margin-top:14px">
+        <svg viewBox="0 0 660 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:660px;display:block;margin:0 auto">
+          <defs>
+            <linearGradient id="gGauge1" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#c0392b"/>
+              <stop offset="60%" style="stop-color:#e67e22"/>
+              <stop offset="100%" style="stop-color:#27ae60"/>
+            </linearGradient>
+          </defs>
+
+          <!-- KPI Bars -->
+          <g id="kpiBars">
+            <!-- Bar 1 -->
+            <text x="10" y="35" fill="#5a3e20" font-size="10" font-family="Georgia">SOP Coverage</text>
+            <rect x="150" y="22" width="400" height="18" rx="9" fill="rgba(196,139,58,0.15)"/>
+            <rect x="150" y="22" width="280" height="18" rx="9" fill="url(#gGauge1)" opacity="0.85"/>
+            <text x="560" y="35" fill="#c0392b" font-size="10" font-weight="bold">70%</text>
+            <text x="620" y="35" fill="#8a6940" font-size="9">เป้า 80%</text>
+
+            <!-- Bar 2 -->
+            <text x="10" y="65" fill="#5a3e20" font-size="10" font-family="Georgia">Knowledge Usage Rate</text>
+            <rect x="150" y="52" width="400" height="18" rx="9" fill="rgba(196,139,58,0.15)"/>
+            <rect x="150" y="52" width="200" height="18" rx="9" fill="#2980b9" opacity="0.8"/>
+            <text x="560" y="65" fill="#2980b9" font-size="10" font-weight="bold">50%</text>
+            <text x="620" y="65" fill="#8a6940" font-size="9">เป้า 60%</text>
+
+            <!-- Bar 3 -->
+            <text x="10" y="95" fill="#5a3e20" font-size="10" font-family="Georgia">Mentoring Completion</text>
+            <rect x="150" y="82" width="400" height="18" rx="9" fill="rgba(196,139,58,0.15)"/>
+            <rect x="150" y="82" width="320" height="18" rx="9" fill="#2a7a6f" opacity="0.8"/>
+            <text x="560" y="95" fill="#2a7a6f" font-size="10" font-weight="bold">80%</text>
+            <text x="620" y="95" fill="#8a6940" font-size="9">เป้า 85%</text>
+
+            <!-- Bar 4 -->
+            <text x="10" y="125" fill="#5a3e20" font-size="10" font-family="Georgia">Employee Participation</text>
+            <rect x="150" y="112" width="400" height="18" rx="9" fill="rgba(196,139,58,0.15)"/>
+            <rect x="150" y="112" width="240" height="18" rx="9" fill="#e67e22" opacity="0.8"/>
+            <text x="560" y="125" fill="#e67e22" font-size="10" font-weight="bold">60%</text>
+            <text x="620" y="125" fill="#8a6940" font-size="9">เป้า 70%</text>
+
+            <!-- Bar 5 -->
+            <text x="10" y="155" fill="#5a3e20" font-size="10" font-family="Georgia">Downtime Reduction</text>
+            <rect x="150" y="142" width="400" height="18" rx="9" fill="rgba(196,139,58,0.15)"/>
+            <rect x="150" y="142" width="180" height="18" rx="9" fill="#8e44ad" opacity="0.8"/>
+            <text x="560" y="155" fill="#8e44ad" font-size="10" font-weight="bold">45%</text>
+            <text x="620" y="155" fill="#8a6940" font-size="9">เป้า 15%↓</text>
+
+            <!-- Bar 6 -->
+            <text x="10" y="185" fill="#5a3e20" font-size="10" font-family="Georgia">Satisfaction Score</text>
+            <rect x="150" y="172" width="400" height="18" rx="9" fill="rgba(196,139,58,0.15)"/>
+            <rect x="150" y="172" width="348" height="18" rx="9" fill="#c0392b" opacity="0.75"/>
+            <text x="560" y="185" fill="#c0392b" font-size="10" font-weight="bold">87%</text>
+            <text x="620" y="185" fill="#8a6940" font-size="9">เป้า 80%</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== ROADMAP ========== -->
+  <section id="roadmap" class="section">
+    <div class="sec-title reveal">🗺 Roadmap การดำเนินงาน 12 เดือน</div>
+    <div class="sec-desc reveal">แผนการดำเนินงานแบ่งเป็น 4 เฟสตามลำดับความสำคัญและความพร้อมขององค์กร</div>
+    <div class="roadmap reveal" id="roadmapList"></div>
+    <div class="section-footer reveal" style="margin-top:16px">
+      🚀 Quick Win ในเฟสแรก: เริ่มจากการจัดทำ SOP ของขั้นตอนที่เสี่ยงสูงสุด 5 อันดับแรก และจับคู่ Mentor-Mentee ภายใน 60 วันแรก เพื่อสร้างโมเมนตัมและความน่าเชื่อถือของโปรแกรม
+    </div>
+  </section>
+
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal-box" id="modalBox">
+    <div class="modal-header">
+      <div>
+        <h3 id="modalTitle">—</h3>
+        <p id="modalSub">—</p>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+
+const riskGroups = [
+  { label: 'ช่างซ่อมบำรุงเครื่องจักร', pct: 92, color: '#c0392b' },
+  { label: 'ผู้ควบคุมกระบวนการ', pct: 85, color: '#e67e22' },
+  { label: 'ช่างไฟฟ้า/อิเล็กทรอนิกส์', pct: 78, color: '#f39c12' },
+  { label: 'ผู้เชี่ยวชาญคุณภาพ', pct: 70, color: '#2980b9' },
+  { label: 'ช่างเทคนิคพิเศษ', pct: 65, color: '#8e44ad' },
+];
+
+const causes = [
+  { icon: '👴', text: 'เกษียณอายุคลื่นใหญ่ (Baby Boomer)' },
+  { icon: '💰', text: 'คู่แข่งเสนอเงินเดือนสูงกว่า' },
+  { icon: '📉', text: 'ขาดเส้นทางความก้าวหน้าที่ชัดเจน' },
+  { icon: '🏭', text: 'สภาพแวดล้อมงานหนักและอันตราย' },
+  { icon: '🧓', text: 'ช่องว่างรุ่น — คนรุ่นใหม่ไม่สนใจ' },
+];
+
+const knowledgeData = [
+  {
+    id: 'k1',
+    icon: '⚙️',
+    iconBg: '#fde8e8',
+    title: 'กระบวนการเดินเครื่อง (Process Operation)',
+    type: 'Procedural Knowledge',
+    risk: 'high',
+    items: [
+      'ขั้นตอน Start-up / Shutdown เครื่องทำกระดาษ',
+      'การปรับค่า Freeness และ Consistency',
+      'การแก้ไขปัญหา Paper Break แบบทันท่วงที',
+      'สูตรและอัตราส่วนเคมี Kraft Pulping',
+    ],
+    detail: {
+      why: 'ความรู้เหล่านี้มักเป็น Tacit Knowledge ที่สะสมจากประสบการณ์หลายปี การสูญเสียจะทำให้เกิด Downtime สูงและคุณภาพสินค้าผันผวน',
+      how: ['จัดทำ SOP ละเอียดพร้อมรูปภาพ', 'วิดีโอบันทึกขั้นตอนจริงในเครื่อง', 'Decision Tree การแก้ปัญหา', 'Log Book อัจฉริยะ (Digital)'],
+      priority: 'ดำเนินการทันที — ภายใน Q1',
+    }
+  },
+  {
+    id: 'k2',
+    icon: '🔧',
+    iconBg: '#fef3e2',
+    title: 'การซ่อมบำรุงเครื่องจักร (Maintenance Know-how)',
+    type: 'Technical Knowledge',
+    risk: 'high',
+    items: [
+      'เทคนิคพิเศษการปรับ Headbox และ Wire Section',
+      'การวินิจฉัยเสียง/สัญญาณผิดปกติของ Dryer',
+      'Troubleshooting Hydraulic System เฉพาะรุ่น',
+      'จุดสังเกตก่อนเครื่องเสีย (Predictive Signs)',
+    ],
+    detail: {
+      why: 'ช่างผู้เชี่ยวชาญมีความสามารถ "ฟังเครื่อง" และวินิจฉัยปัญหาจากเสียงและความสั่นสะเทือน ซึ่งไม่มีในคู่มือเครื่องจักร',
+      how: ['บันทึกเสียง/วิดีโอตอนซ่อมจริง', 'Fault Tree Analysis (FTA)', 'Augmented Reality Maintenance Guide', 'Digital Twin ของเครื่องจักรหลัก'],
+      priority: 'ดำเนินการทันที — ภายใน Q1',
+    }
+  },
+  {
+    id: 'k3',
+    icon: '🧪',
+    iconBg: '#e8f8f0',
+    title: 'สูตรและกระบวนการเคมี (Chemical Process)',
+    type: 'Expert Knowledge',
+    risk: 'high',
+    items: [
+      'สูตรน้ำยา Black Liquor Recovery ที่ปรับแต่งเอง',
+      'การควบคุม pH และ Kappa Number',
+      'เทคนิคป้องกัน Pitch Deposits',
+      'การจัดการ Effluent Treatment พิเศษ',
+    ],
+    detail: {
+      why: 'สูตรเคมีบางส่วนเป็น Know-how ที่ปรับแต่งเฉพาะสายการผลิต มีผลโดยตรงต่อต้นทุนและคุณภาพ',
+      how: ['Chemical Recipe Database ที่เข้ารหัส', 'Lab Notebook ดิจิทัล', 'Process Control Chart พร้อม Annotation', 'Expert Interview Series'],
+      priority: 'ดำเนินการภายใน Q2',
+    }
+  },
+  {
+    id: 'k4',
+    icon: '📊',
+    iconBg: '#e8f0fe',
+    title: 'การควบคุมคุณภาพ (Quality Control)',
+    type: 'Analytical Knowledge',
+    risk: 'med',
+    items: [
+      'เกณฑ์การตัดสินคุณภาพกระดาษเชิงประสาทสัมผัส',
+      'การแก้ไขข้อบกพร่องแต่ละประเภท (Holes, Wrinkles)',
+      'การปรับค่าเครื่องจากผล QC Test',
+      'ความสัมพันธ์ระหว่างวัตถุดิบและคุณสมบัติกระดาษ',
+    ],
+    detail: {
+      why: 'QC Expertise รวมถึงการ "สัมผัสและมองเห็น" ข้อบกพร่องที่เครื่องตรวจวัดไม่พบ ซึ่งต้องอาศัยประสบการณ์สะสม',
+      how: ['Photo/Video Defect Library', 'Sensory Evaluation Guide', 'Statistical SPC Knowledge Base', 'Case Study ปัญหาคุณภาพในอดีต'],
+      priority: 'ดำเนินการภายใน Q2',
+    }
+  },
+  {
+    id: 'k5',
+    icon: '⚡',
+    iconBg: '#f3e8ff',
+    title: 'ระบบไฟฟ้าและอัตโนมัติ (Electrical & Automation)',
+    type: 'Specialized Knowledge',
+    risk: 'high',
+    items: [
+      'การตั้งค่า PLC/SCADA เฉพาะสายการผลิต',
+      'Wiring Diagram ที่ถูกดัดแปลงจากต้นฉบับ',
+      'การแก้ไข Fault Code เฉพาะของโรงงาน',
+      'Calibration ของ Sensor ต่างๆ',
+    ],
+    detail: {
+      why: 'ระบบ Automation มักถูกดัดแปลงให้เหมาะกับสภาพโรงงาน เอกสารต้นฉบับจึงไม่ครอบคลุม ช่างไฟฟ้าอาวุโสเป็นคนเดียวที่รู้',
+      how: ['As-Built Drawing ฉบับอัพเดต', 'PLC Program Version Control', 'Video Tutorial การแก้ Fault', 'Electrical Knowledge Wiki'],
+      priority: 'ดำเนินการทันที — ภายใน Q1',
+    }
+  },
+  {
+    id: 'k6',
+    icon: '🤝',
+    iconBg: '#fff8e1',
+    title: 'ความสัมพันธ์และ Tacit Skills (Relational)',
+    type: 'Tacit Knowledge',
+    risk: 'med',
+    items: [
+      'ช่องทางติดต่อผู้ขายอะไหล่ฉุกเฉินนอกระบบ',
+      'เทคนิค "ชั่วคราว" ที่ใช้แก้ไขกรณีฉุกเฉิน',
+      'ประวัติปัญหาเครื่องจักรแต่ละตัว (Oral History)',
+      'วิธีทำงานร่วมกับทีม Shift ต่างๆ',
+    ],
+    detail: {
+      why: 'Tacit Knowledge เหล่านี้จัดเก็บยากที่สุด แต่สำคัญมากในภาวะฉุกเฉิน ควรใช้วิธี Storytelling และ After-Action Review',
+      how: ['Storytelling Sessions บันทึกเสียง', 'Supplier/Contact Database', 'Lessons Learned Repository', 'Exit Interview Structured Form'],
+      priority: 'ดำเนินการภายใน Q3 (ต่อเนื่อง)',
+    }
+  },
+];
+
+const storageData = [
+  { type: 'SOP / Work Instruction', format: 'PDF + Video', tool: 'SharePoint / Google Drive / Notion', freq: 'ทุกครั้งที่ขั้นตอนเปลี่ยน' },
+  { type: 'Troubleshooting Guide', format: 'Decision Tree + Case Study', tool: 'Confluence / MediaWiki', freq: 'หลังเกิดเหตุการณ์ผิดปกติ' },
+  { type: 'วิดีโอการปฏิบัติงาน', format: 'MP4 + บทบรรยาย Timestamp', tool: 'Internal Video Platform / YouTube Private', freq: 'รายไตรมาส' },
+  { type: 'Chemical/Process Recipe', format: 'Structured Database + PDF', tool: 'ERP System / Custom DB', freq: 'เมื่อมีการปรับสูตร' },
+  { type: 'Equipment History', format: 'Digital Log + CMMS', tool: 'SAP PM / MAXIMO / eMaint', freq: 'ทุกครั้งที่มีงานซ่อม' },
+  { type: 'Lessons Learned', format: 'Structured Narrative + Photo', tool: 'KM Portal / Intranet', freq: 'หลัง AAR ทุกเหตุการณ์' },
+  { type: 'Expert Knowledge (Tacit)', format: 'Video Interview + Transcript', tool: 'Video Library + Search Index', freq: 'รายปี หรือก่อนเกษียณ' },
+  { type: 'Quality Defect Library', format: 'Photo Gallery + Annotation', tool: 'Document Management System', freq: 'ต่อเนื่องรายเดือน' },
+];
+
+const transferSteps = [
+  {
+    num: 1, title: 'Knowledge Identification & Audit',
+    desc: 'สำรวจและระบุผู้ถือครองความรู้ (Knowledge Holders) และจัดอันดับความเสี่ยงตามอายุงาน แผนเกษียณ และความเป็นเอกลักษณ์ของความรู้',
+    tools: ['Knowledge Audit Tool', 'Employee Survey', 'HR Data Analysis'],
+    modal: { why: 'ขั้นตอนนี้ช่วยให้รู้ว่า "ใครรู้อะไร" และ "อะไรสำคัญที่สุด" ก่อนจะเริ่มกระบวนการจัดเก็บ', detail: 'ควรทำ Skills Matrix ร่วมกับ HR สัมภาษณ์หัวหน้าทีมทุกแผนก และวิเคราะห์ข้อมูล Turnover ย้อนหลัง 3 ปี' }
+  },
+  {
+    num: 2, title: 'Structured Knowledge Elicitation',
+    desc: 'ใช้เทคนิคสัมภาษณ์เชิงลึก Critical Incident Technique (CIT) และ Think-Aloud Protocol เพื่อดึง Tacit Knowledge ออกมา',
+    tools: ['Expert Interview', 'CIT Methodology', 'Think-Aloud Protocol', 'Storytelling Session'],
+    modal: { why: 'Tacit Knowledge ไม่สามารถดึงออกมาด้วยการถามตรงๆ ต้องใช้เทคนิคการสัมภาษณ์เฉพาะ', detail: 'ฝึก Knowledge Analyst 2-3 คนในองค์กรให้สามารถทำ Elicitation Session และบันทึกอย่างมีโครงสร้าง' }
+  },
+  {
+    num: 3, title: 'Codification & Documentation',
+    desc: 'แปลง Knowledge ที่ได้จากการสัมภาษณ์เป็นเอกสาร SOP วิดีโอ หรือฐานข้อมูลที่มีโครงสร้างชัดเจน',
+    tools: ['SOP Template', 'Screen Recording', 'Video Production', 'Wiki Platform'],
+    modal: { why: 'การแปลงความรู้ให้อยู่ในรูปแบบที่เข้าถึงได้และค้นหาได้ง่ายเป็นหัวใจของ KM', detail: 'ใช้ Template มาตรฐาน เพิ่มรูปภาพและวิดีโอ จัดทำ Metadata ที่ดีเพื่อให้ค้นหาง่าย' }
+  },
+  {
+    num: 4, title: 'Mentor-Mentee Program',
+    desc: 'จับคู่ผู้เชี่ยวชาญ (Mentor) กับผู้สืบทอด (Mentee) อย่างเป็นระบบ มีแผนการเรียนรู้ 6-12 เดือน และ Milestone ชัดเจน',
+    tools: ['Mentoring Platform', 'Learning Plan Template', 'Progress Tracker'],
+    modal: { why: 'Mentoring เป็นวิธีที่มีประสิทธิภาพสูงสุดในการถ่ายทอด Tacit Knowledge ในสภาพแวดล้อมจริง', detail: 'กำหนดเวลา Mentoring อย่างน้อย 4 ชั่วโมง/สัปดาห์ มีการวัดผล Competency ของ Mentee ทุก 2 เดือน' }
+  },
+  {
+    num: 5, title: 'Communities of Practice (CoP)',
+    desc: 'สร้างกลุ่มชุมชนนักปฏิบัติแยกตามสายงาน เช่น CoP ช่างซ่อมบำรุง CoP QC เพื่อแลกเปลี่ยนความรู้สม่ำเสมอ',
+    tools: ['MS Teams / LINE OA', 'Monthly CoP Meeting', 'Knowledge Forum'],
+    modal: { why: 'CoP สร้างวัฒนธรรมการแบ่งปันความรู้แบบ Bottom-Up ที่ยั่งยืนกว่าการสั่งการจากบนลงล่าง', detail: 'แต่ละ CoP ควรมีผู้นำ (CoP Leader) ที่มีความน่าเชื่อถือ ไม่ใช่ผู้บริหาร เพื่อให้สมาชิกรู้สึกสบายใจในการแบ่งปัน' }
+  },
+  {
+    num: 6, title: 'Knowledge Validation & Update',
+    desc: 'ตรวจสอบความถูกต้องของ Knowledge Base อย่างสม่ำเสมอ อัพเดตเมื่อกระบวนการเปลี่ยนแปลง และลบข้อมูลล้าสมัย',
+    tools: ['Review Cycle', 'Document Owner System', 'Version Control'],
+    modal: { why: 'KM ที่ไม่อัพเดตจะกลายเป็นภาระ ข้อมูลเก่าที่ผิดพลาดอาจอันตรายกว่าการไม่มีข้อมูล', detail: 'กำหนด Document Owner สำหรับทุกเอกสาร และระบบแจ้งเตือนรีวิวทุก 6 เดือน หรือเมื่อมีการเปลี่ยนแปลงกระบวนการ' }
+  },
+];
+
+const toolsData = [
+  {
+    icon: '📝',
+    iconBg: '#fde8e8',
+    title: 'Confluence / Notion',
+    type: 'Wiki & Document',
+    items: ['สร้าง Knowledge Base ที่ค้นหาง่าย', 'Template SOP และ Troubleshooting', 'ระบบ Version Control', 'เชื่อมโยงเอกสารที่เกี่ยวข้อง'],
+  },
+  {
+    icon: '🎬',
+    iconBg: '#e8f0fe',
+    title: 'Loom / Camtasia',
+    type: 'Video Knowledge',
+    items: ['บันทึก How-to Video แบบง่าย', 'Screen + Camera Recording', 'Caption อัตโนมัติ', 'ค้นหาใน Transcript ได้'],
+  },
+  {
+    icon: '🔧',
+    iconBg: '#fef3e2',
+    title: 'SAP PM / CMMS',
+    type: 'Maintenance Knowledge',
+    items: ['บันทึกประวัติการซ่อมแต่ละเครื่อง', 'PM Checklist ดิจิทัล', 'Spare Parts Knowledge', 'Failure Mode Library'],
+  },
+  {
+    icon: '💬',
+    iconBg: '#e8f8f0',
+    title: 'MS Teams / LINE Works',
+    type: 'Collaboration',
+    items: ['CoP Channel ตามสายงาน', 'แชร์ความรู้แบบ Real-time', 'Searchable Message History', 'File Sharing + Version'],
+  },
+];
+
+const motivData = [
+  {
+    color: '#c0392b',
+    icon: '🏆',
+    title: 'Recognition & Awards',
+    desc: 'ระบบยกย่องผู้ที่แบ่งปันความรู้ต่อหน้าสาธารณะในองค์กร',
+    items: ['Knowledge Hero ประจำเดือน/ปี', 'ประกาศยกย่องในที่ประชุมใหญ่', 'Certificate ผู้เชี่ยวชาญ (Certified Expert)', 'Digital Badge บน Profile ระบบภายใน'],
+  },
+  {
+    color: '#2980b9',
+    icon: '💰',
+    title: 'Financial Incentives',
+    desc: 'ค่าตอบแทนทางการเงินสำหรับการสร้างและแบ่งปันความรู้',
+    items: ['ค่าตอบแทนพิเศษ "KM Bonus" รายไตรมาส', 'เงินรางวัลจัดทำ SOP / VDO ที่มีคุณภาพ', 'Mentoring Fee สำหรับผู้ทำหน้าที่ Mentor', 'เชื่อม KM ใน KPI เงินเดือนประจำปี'],
+  },
+  {
+    color: '#2a7a6f',
+    icon: '📈',
+    title: 'Career Development',
+    desc: 'เชื่อมกิจกรรม KM กับความก้าวหน้าในสายอาชีพ',
+    items: ['KM Portfolio เป็นส่วนหนึ่งของการเลื่อนตำแหน่ง', '"ผู้เชี่ยวชาญอาวุโส" เส้นทางเฉพาะ (IC Track)', 'โอกาสสอนในการอบรมภายนอก', 'ร่วมกิจกรรม Benchmarking ต่างบริษัท'],
+  },
+  {
+    color: '#e67e22',
+    icon: '🎮',
+    title: 'Gamification',
+    desc: 'ระบบคะแนนและความสำเร็จเพื่อสร้างความสนุกในการแบ่งปัน',
+    items: ['Leaderboard คะแนน Knowledge Sharing', 'Badge Collection ตามประเภทความรู้', 'Team Challenge "แผนกไหนสร้าง SOP มากที่สุด"', 'Progress Bar แสดงเปอร์เซ็นต์การถ่ายทอด'],
+  },
+  {
+    color: '#8e44ad',
+    icon: '🌱',
+    title: 'Psychological Safety',
+    desc: 'สร้างบรรยากาศที่ปลอดภัยให้กล้าแบ่งปันแม้แต่ความผิดพลาด',
+    items: ['"No Blame Culture" สำหรับ Lessons Learned', 'ชม Effort ไม่ใช่แค่ผลลัพธ์', 'ผู้บริหารเป็นแบบอย่างแบ่งปันความรู้ก่อน', 'Protected Time สำหรับกิจกรรม KM'],
+  },
+  {
+    color: '#27ae60',
+    icon: '📅',
+    title: 'Structured Time',
+    desc: 'จัดสรรเวลาในกะงานอย่างเป็นทางการสำหรับ KM Activities',
+    items: ['KM Time 1 ชั่วโมง/สัปดาห์ (ไม่ใช่โอที)', 'CoP Meeting บน Working Hour', 'Handover Meeting แบบมีโครงสร้าง', 'Knowledge Day ปีละ 1-2 ครั้ง'],
+  },
+];
+
+const kpiData = [
+  {
+    icon: '📋',
+    iconBg: '#fde8e8',
+    color: '#c0392b',
+    title: 'Knowledge Capture',
+    cat: 'มิติการจัดเก็บ',
+    metrics: [
+      { name: 'ครอบคลุม SOP กระบวนการหลัก', target: '≥80%', tColor: '#c0392b', bg: '#fde8e8' },
+      { name: 'จำนวน SOP ที่จัดทำใหม่/ปี', target: '≥50 doc', tColor: '#c0392b', bg: '#fde8e8' },
+      { name: 'Knowledge ผู้เชี่ยวชาญถูกบันทึก', target: '≥70%', tColor: '#c0392b', bg: '#fde8e8' },
+    ],
+    modalData: { desc: 'วัดความสมบูรณ์ของฐานความรู้ เน้นกระบวนการที่เสี่ยงสูงสุดก่อน', notes: 'ทบทวน SOP Coverage ทุกไตรมาสโดยทีม KM ร่วมกับหัวหน้าแผนก' }
+  },
+  {
+    icon: '🔄',
+    iconBg: '#e8f0fe',
+    color: '#2980b9',
+    title: 'Knowledge Transfer',
+    cat: 'มิติการถ่ายทอด',
+    metrics: [
+      { name: 'Mentoring Pair ที่ Active', target: '≥85% complete', tColor: '#2980b9', bg: '#e8f0fe' },
+      { name: 'CoP Meeting Attendance', target: '≥70% rate', tColor: '#2980b9', bg: '#e8f0fe' },
+      { name: 'Job Rotation ที่เสร็จสมบูรณ์', target: '≥4 cycles/yr', tColor: '#2980b9', bg: '#e8f0fe' },
+    ],
+    modalData: { desc: 'วัดความเข้มข้นของกระบวนการถ่ายทอด ทั้ง Formal และ Informal', notes: 'Track ผ่าน HR System และ LMS เชื่อม Mentoring KPI กับ Performance Review ของ Mentor' }
+  },
+  {
+    icon: '📈',
+    iconBg: '#e8f8f0',
+    color: '#27ae60',
+    title: 'Knowledge Usage',
+    cat: 'มิติการนำไปใช้',
+    metrics: [
+      { name: 'Document Access Rate', target: '≥60%/month', tColor: '#27ae60', bg: '#e8f8f0' },
+      { name: 'Problem Solved via KM', target: '≥40% cases', tColor: '#27ae60', bg: '#e8f8f0' },
+      { name: 'New Employee Onboard Speed', target: '-30% time', tColor: '#27ae60', bg: '#e8f8f0' },
+    ],
+    modalData: { desc: 'วัดว่าความรู้ที่สร้างขึ้นถูกนำไปใช้จริงในการทำงาน ไม่ใช่แค่เก็บไว้', notes: 'ติดตามผ่าน Analytics ของ KM Platform และ Ticket System ของฝ่ายซ่อมบำรุง' }
+  },
+  {
+    icon: '💼',
+    iconBg: '#fef3e2',
+    color: '#e67e22',
+    title: 'Business Impact',
+    cat: 'มิติผลลัพธ์ธุรกิจ',
+    metrics: [
+      { name: 'Machine Downtime Reduction', target: '≥15% decrease', tColor: '#e67e22', bg: '#fef3e2' },
+      { name: 'Quality Defect Rate', target: '≥10% decrease', tColor: '#e67e22', bg: '#fef3e2' },
+      { name: 'Mean Time to Repair (MTTR)', target: '≥20% faster', tColor: '#e67e22', bg: '#fef3e2' },
+    ],
+    modalData: { desc: 'วัดผลลัพธ์ที่ KM สร้างให้กับธุรกิจ เพื่อยืนยัน ROI ของโปรแกรม', notes: 'เปรียบเทียบ Baseline ก่อนและหลัง KM Program วัดร่วมกับ Operations KPI ปกติ' }
+  },
+  {
+    icon: '👥',
+    iconBg: '#f3e8ff',
+    color: '#8e44ad',
+    title: 'Participation & Culture',
+    cat: 'มิติวัฒนธรรม',
+    metrics: [
+      { name: 'Employee KM Participation', target: '≥70% staff', tColor: '#8e44ad', bg: '#f3e8ff' },
+      { name: 'KM Satisfaction Score', target: '≥4/5 stars', tColor: '#8e44ad', bg: '#f3e8ff' },
+      { name: 'Knowledge Contribution/Person', target: '≥2 items/yr', tColor: '#8e44ad', bg: '#f3e8ff' },
+    ],
+    modalData: { desc: 'วัดการมีส่วนร่วมและทัศนคติต่อ KM ของพนักงาน เพื่อประเมินวัฒนธรรมองค์กร', notes: 'สำรวจ 2 ครั้ง/ปี และ Pulse Survey รายเดือน ประเมินผ่าน eNPS ที่รวม KM Items' }
+  },
+  {
+    icon: '🧠',
+    iconBg: '#fff8e1',
+    color: '#f39c12',
+    title: 'Brain Drain Prevention',
+    cat: 'มิติลดความเสี่ยง',
+    metrics: [
+      { name: 'Critical Knowledge Coverage', target: '100% High-Risk', tColor: '#f39c12', bg: '#fff8e1' },
+      { name: 'Succession Readiness Score', target: '≥80% roles', tColor: '#f39c12', bg: '#fff8e1' },
+      { name: 'Knowledge Risk Index', target: 'ลดลง ≥30%', tColor: '#f39c12', bg: '#fff8e1' },
+    ],
+    modalData: { desc: 'KPI หลักในการป้องกัน Brain Drain วัดว่าองค์กรมีความพร้อมรับมือกับการสูญเสียบุคลากรแค่ไหน', notes: 'ทำ Succession Plan Review ทุกปี และอัพเดต Knowledge Risk Matrix ทุกไตรมาส' }
+  },
+];
+
+const roadmapData = [
+  {
+    phase: 'Phase 1', time: 'เดือน 1-3', color: '#c0392b',
+    title: '🏁 Foundation — วางรากฐาน',
+    desc: 'สร้างโครงสร้างพื้นฐานและเริ่มจัดเก็บ Knowledge ที่เร่งด่วน',
+    tasks: [
+      { label: 'Knowledge Audit', color: '#fde8e8', tc: '#c0392b' },
+      { label: 'เลือก KM Platform', color: '#fde8e8', tc: '#c0392b' },
+      { label: 'SOP Template', color: '#fde8e8', tc: '#c0392b' },
+      { label: 'จับคู่ Mentor-Mentee', color: '#fde8e8', tc: '#c0392b' },
+      { label: 'SOP 20 รายการแรก', color: '#fde8e8', tc: '#c0392b' },
+    ],
+    modal: { goal: 'สร้าง Quick Wins และ Buy-in จากผู้บริหารและพนักงาน', kpi: 'SOP 20 รายการ, Mentor Pair 5 คู่, Platform พร้อมใช้' }
+  },
+  {
+    phase: 'Phase 2', time: 'เดือน 4-6', color: '#e67e22',
+    title: '📦 Capture — รวบรวมความรู้',
+    desc: 'เร่งการจัดเก็บ Tacit Knowledge จากผู้เชี่ยวชาญอย่างเป็นระบบ',
+    tasks: [
+      { label: 'Expert Interview Series', color: '#fef3e2', tc: '#e67e22' },
+      { label: 'Video Production', color: '#fef3e2', tc: '#e67e22' },
+      { label: 'CoP ทุกแผนก', color: '#fef3e2', tc: '#e67e22' },
+      { label: 'Gamification Launch', color: '#fef3e2', tc: '#e67e22' },
+      { label: 'Chemical DB', color: '#fef3e2', tc: '#e67e22' },
+    ],
+    modal: { goal: 'ดึงและบันทึก Tacit Knowledge ให้ได้ 50% ของเป้าหมาย', kpi: 'Video 30+, CoP Active, Participation 50%' }
+  },
+  {
+    phase: 'Phase 3', time: 'เดือน 7-9', color: '#2a7a6f',
+    title: '🔄 Transfer — ถ่ายทอดและใช้งาน',
+    desc: 'ขยายผลการถ่ายทอดความรู้และสร้างนิสัยการใช้งาน KM',
+    tasks: [
+      { label: 'Training Program', color: '#e8f8f0', tc: '#2a7a6f' },
+      { label: 'Job Rotation', color: '#e8f8f0', tc: '#2a7a6f' },
+      { label: 'KM Portal 2.0', color: '#e8f8f0', tc: '#2a7a6f' },
+      { label: 'KPI Review ครั้งแรก', color: '#e8f8f0', tc: '#2a7a6f' },
+      { label: 'Reward Ceremony Q2', color: '#e8f8f0', tc: '#2a7a6f' },
+    ],
+    modal: { goal: 'ทำให้ KM เป็นส่วนหนึ่งของกิจวัตรประจำวัน ไม่ใช่งานพิเศษ', kpi: 'Usage Rate 50%, Training 80% attendance' }
+  },
+  {
+    phase: 'Phase 4', time: 'เดือน 10-12', color: '#2980b9',
+    title: '🚀 Sustain — ทำให้ยั่งยืน',
+    desc: 'ประเมินผล ปรับปรุง และสร้างกลไกความยั่งยืนระยะยาว',
+    tasks: [
+      { label: 'Annual KM Review', color: '#e8f0fe', tc: '#2980b9' },
+      { label: 'Succession Plan Update', color: '#e8f0fe', tc: '#2980b9' },
+      { label: 'KM Policy ทางการ', color: '#e8f0fe', tc: '#2980b9' },
+      { label: 'Year 2 Plan', color: '#e8f0fe', tc: '#2980b9' },
+      { label: 'Knowledge Day Event', color: '#e8f0fe', tc: '#2980b9' },
+    ],
+    modal: { goal: 'ทำให้ KM เป็น DNA ขององค์กร ไม่ใช่แค่โครงการชั่วคราว', kpi: 'Full KPI Review, Policy Published, Year 2 Budget Approved' }
+  },
+];
+
+// ============================================================
+// RENDER FUNCTIONS
+// ============================================================
+
+function renderRiskBars() {
+  const container = document.getElementById('riskBars');
+  container.innerHTML = riskGroups.map(r => `
+    <div class="risk-row">
+      <div class="risk-label">${r.label}</div>
+      <div class="risk-bar-wrap">
+        <div class="risk-bar" style="width:0%;background:${r.color}" data-pct="${r.pct}"></div>
+      </div>
+      <div class="risk-pct" style="color:${r.color}">${r.pct}%</div>
+    </div>
+  `).join('');
+
+  setTimeout(() => {
+    container.querySelectorAll('.risk-bar').forEach(bar => {
+      bar.style.width = bar.dataset.pct + '%';
+    });
+  }, 300);
+}
+
+function renderCauses() {
+  const container = document.getElementById('causeList');
+  container.innerHTML = causes.map(c => `
+    <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px dashed rgba(196,139,58,0.2)">
+      <span style="font-size:1.2rem">${c.icon}</span>
+      <span style="font-size:0.85rem;color:#5a3e20;line-height:1.5">${c.text}</span>
+    </div>
+  `).join('');
+}
+
+function renderKnowledge() {
+  const grid = document.getElementById('knowledgeGrid');
+  grid.innerHTML = knowledgeData.map(k => `
+    <div class="k-card reveal" onclick="openKnowledgeModal('${k.id}')">
+      <div class="k-card-header">
+        <div class="k-card-icon" style="background:${k.iconBg}">${k.icon}</div>
+        <div>
+          <div class="k-card-title">${k.title}</div>
+          <div class="k-card-type">${k.type}</div>
+          <span class="risk-badge ${k.risk === 'high' ? 'risk-high' : k.risk === 'med' ? 'risk-med' : 'risk-low'}">
+            ${k.risk === 'high' ? '🔴 ความเสี่ยงสูง' : k.risk === 'med' ? '🟡 ความเสี่ยงกลาง' : '🟢 ความเสี่ยงต่ำ'}
+          </span>
+        </div>
+      </div>
+      <div class="k-card-body">
+        <ul class="k-card-items">
+          ${k.items.map(item => `<li><span class="dot"></span>${item}</li>`).join('')}
+        </ul>
+        <div style="margin-top:10px;font-size:0.78rem;color:#8a6940;text-align:right">คลิกเพื่อดูรายละเอียด →</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderStorage() {
+  const tbody = document.getElementById('storageTable');
+  tbody.innerHTML = storageData.map((row, i) => `
+    <tr>
+      <td><strong style="color:#3d2b0e">${row.type}</strong></td>
+      <td>${row.format}</td>
+      <td style="color:#2a7a6f;font-weight:500">${row.tool}</td>
+      <td style="color:#8a6940;font-style:italic">${row.freq}</td>
+    </tr>
+  `).join('');
+}
+
+function renderTransfer() {
+  const steps = document.getElementById('transferSteps');
+  steps.innerHTML = transferSteps.map(s => `
+    <div class="flow-step" onclick="openTransferModal(${s.num - 1})">
+      <div class="step-num">${s.num}</div>
+      <div class="step-content">
+        <h4>${s.title}</h4>
+        <p>${s.desc}</p>
+        <div class="step-tools">
+          ${s.tools.map(t => `<span class="tool-chip">${t}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderTools() {
+  const grid = document.getElementById('toolsGrid');
+  grid.innerHTML = toolsData.map(t => `
+    <div class="k-card reveal">
+      <div class="k-card-header">
+        <div class="k-card-icon" style="background:${t.iconBg}">${t.icon}</div>
+        <div>
+          <div class="k-card-title">${t.title}</div>
+          <div class="k-card-type">${t.type}</div>
+        </div>
+      </div>
+      <div class="k-card-body">
+        <ul class="k-card-items">
+          ${t.items.map(item => `<li><span class="dot"></span>${item}</li>`).join('')}
+        </ul>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderMotivation() {
+  const grid = document.getElementById('motivGrid');
+  grid.innerHTML = motivData.map(m => `
+    <div class="motive-card reveal" style="border-top-color:${m.color}" onclick="openMotiveModal('${m.title}', ${JSON.stringify(m).replace(/'/g, "&#39;")})">
+      <span class="m-icon">${m.icon}</span>
+      <h4>${m.title}</h4>
+      <p>${m.desc}</p>
+      <ul class="motive-list">
+        ${m.items.map(i => `<li><span class="check">✓</span>${i}</li>`).join('')}
+      </ul>
+    </div>
+  `).join('');
+}
+
+function renderKPI() {
+  const grid = document.getElementById('kpiGrid');
+  grid.innerHTML = kpiData.map((k, idx) => `
+    <div class="kpi-card reveal" onclick="openKpiModal(${idx})">
+      <div class="kpi-header">
+        <div class="kpi-icon" style="background:${k.iconBg}">${k.icon}</div>
+        <div>
+          <div class="kpi-title">${k.title}</div>
+          <div class="kpi-cat">${k.cat}</div>
+        </div>
+      </div>
+      <div class="kpi-body">
+        <ul class="kpi-metrics">
+          ${k.metrics.map(m => `
+            <li>
+              <span class="kpi-metric-name">${m.name}</span>
+              <span class="kpi-target" style="background:${m.bg};color:${m.tColor}">${m.target}</span>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderRoadmap() {
+  const list = document.getElementById('roadmapList');
+  list.innerHTML = roadmapData.map((p, i) => `
+    <div class="roadmap-phase" onclick="openRoadmapModal(${i})">
+      <div class="phase-marker" style="border-right-color:${p.color}20">
+        <div class="phase-num" style="color:${p.color}">${p.phase}</div>
+        <div class="phase-timeline">${p.time}</div>
+      </div>
+      <div class="phase-content">
+        <h4>${p.title}</h4>
+        <p style="font-size:0.83rem;color:#5a3e20;margin-bottom:6px">${p.desc}</p>
+        <div class="phase-tasks">
+          ${p.tasks.map(t => `<span class="task-tag" style="background:${t.color};color:${t.tc}">${t.label}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+
+function openModal(title, sub, bodyHTML) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalSub').textContent = sub;
+  document.getElementById('modalBody').innerHTML = bodyHTML;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modalOverlay') || e.currentTarget === document.querySelector('.modal-close')) {
+    document.getElementById('modalOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+}
+
+function openKnowledgeModal(id) {
+  const k = knowledgeData.find(d => d.id === id);
+  if (!k) return;
+  openModal(k.title, k.type,
+    `<div class="modal-section">
+      <h4>⚠️ ทำไมต้องจัดเก็บ?</h4>
+      <p>${k.detail.why}</p>
+    </div>
+    <div class="modal-section">
+      <h4>📝 วิธีการจัดเก็บที่แนะนำ</h4>
+      <ul>${k.detail.how.map(h => `<li>${h}</li>`).join('')}</ul>
+    </div>
+    <div class="modal-section">
+      <h4>⏰ ลำดับความสำคัญ</h4>
+      <p style="color:#c0392b;font-weight:700">${k.detail.priority}</p>
+    </div>`
+  );
+}
+
+function openTransferModal(idx) {
+  const s = transferSteps[idx];
+  openModal(s.title, 'กระบวนการ Knowledge Transfer',
+    `<div class="modal-section">
+      <h4>🎯 วัตถุประสงค์</h4>
+      <p>${s.desc}</p>
+    </div>
+    <div class="modal-section">
+      <h4>💡 ทำไมขั้นตอนนี้สำคัญ?</h4>
+      <p>${s.modal.why}</p>
+    </div>
+    <div class="modal-section">
+      <h4>🔧 แนวทางปฏิบัติ</h4>
+      <p>${s.modal.detail}</p>
+    </div>
+    <div class="modal-section">
+      <h4>🛠 เครื่องมือ</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        ${s.tools.map(t => `<span class="tool-chip">${t}</span>`).join('')}
+      </div>
+    </div>`
+  );
+}
+
+function openMotiveModal(title, m) {
+  openModal(title, 'กลยุทธ์แรงจูงใจ',
+    `<div class="modal-section">
+      <h4>📌 แนวคิด</h4>
+      <p>${m.desc}</p>
+    </div>
+    <div class="modal-section">
+      <h4>✅ กิจกรรม/วิธีการ</h4>
+      <ul>${m.items.map(i => `<li>${i}</li>`).join('')}</ul>
+    </div>`
+  );
+}
+
+function openKpiModal(idx) {
+  const k = kpiData[idx];
+  openModal(k.title, k.cat,
+    `<div class="modal-section">
+      <h4>📋 ความหมายของ KPI กลุ่มนี้</h4>
+      <p>${k.modalData.desc}</p>
+    </div>
+    <div class="modal-section">
+      <h4>🎯 ตัวชี้วัดและเป้าหมาย</h4>
+      <ul>${k.metrics.map(m => `<li><strong>${m.name}:</strong> ${m.target}</li>`).join('')}</ul>
+    </div>
+    <div class="modal-section">
+      <h4>💡 วิธีวัดผลและข้อแนะนำ</h4>
+      <p>${k.modalData.notes}</p>
+    </div>`
+  );
+}
+
+function openRoadmapModal(idx) {
+  const p = roadmapData[idx];
+  openModal(p.title, p.time,
+    `<div class="modal-section">
+      <h4>🎯 เป้าหมายของเฟส</h4>
+      <p>${p.modal.goal}</p>
+    </div>
+    <div class="modal-section">
+      <h4>📋 กิจกรรมหลัก</h4>
+      <ul>${p.tasks.map(t => `<li>${t.label}</li>`).join('')}</ul>
+    </div>
+    <div class="modal-section">
+      <h4>📈 KPI Success Criteria</h4>
+      <p>${p.modal.kpi}</p>
+    </div>`
+  );
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    if (t.getAttribute('onclick').includes(id)) t.classList.add('active');
+  });
+  triggerReveal();
+}
+
+// ============================================================
+// SCROLL REVEAL
+// ============================================================
+
+function triggerReveal() {
+  setTimeout(() => {
+    document.querySelectorAll('.reveal').forEach((el, i) => {
+      setTimeout(() => el.classList.add('visible'), i * 70);
+    });
+  }, 50);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+
+window.addEventListener('DOMContentLoaded', () => {
+  renderRiskBars();
+  renderCauses();
+  renderKnowledge();
+  renderStorage();
+  renderTransfer();
+  renderTools();
+  renderMotivation();
+  renderKPI();
+  renderRoadmap();
+  triggerReveal();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+</body>
+</html>
