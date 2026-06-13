@@ -36,7 +36,6 @@ body{font-family:'Sarabun',sans-serif;background:var(--gray-100);color:var(--tex
 .meta{background:#fff;border-bottom:2.5px solid var(--teal);padding:14px 26px;}  
 .meta-ttl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:10px;}  
 .meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 24px;}  
-@media(max-width:680px){.meta-grid{grid-template-columns:1fr 1fr;}}  
 .mf{display:flex;flex-direction:column;gap:2px;}  
 .ml{font-size:10px;color:var(--gray-400);text-transform:uppercase;letter-spacing:1px;}  
 .mi{border:none;border-bottom:1.5px solid var(--gray-200);padding:4px 0;  
@@ -123,7 +122,6 @@ tr.dr.rf{background:var(--fail-bg);}
 .sttl{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;  
   color:var(--teal);margin-bottom:12px;}  
 .sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}  
-@media(max-width:600px){.sgrid{grid-template-columns:1fr 1fr;}}  
 .sc{background:#fff;border-radius:10px;border:1.5px solid var(--gray-200);padding:14px;text-align:center;}  
 .sc .sv{font-size:26px;font-weight:800;line-height:1;margin-bottom:3px;}  
 .sc .sl{font-size:10px;color:var(--gray-400);text-transform:uppercase;letter-spacing:1px;}  
@@ -161,10 +159,46 @@ tr.dr.rf{background:var(--fail-bg);}
 .btn-d:hover{background:var(--fail);color:#fff;}  
 .anote{margin-left:auto;font-size:11px;color:var(--gray-400);}
 
+/* ── RESPONSIVE DESIGN (Desktop / iPad / Mobile) ── */
+
+/* iPad / Tablet Mode (768px - 1024px) */
+@media (max-width: 1024px) {
+  .meta-grid { grid-template-columns: 1fr 1fr; }
+  .sgrid { grid-template-columns: 1fr 1fr; }
+  .ph-body, .banner, .meta, .tw, .sum, .abar { padding-left: 16px; padding-right: 16px; }
+  .ph-icon { padding: 18px 16px; }
+}
+
+/* Mobile Mode (max-width: 767px) */
+@media (max-width: 767px) {
+  .meta-grid { grid-template-columns: 1fr; gap: 12px; }
+  .sgrid { grid-template-columns: 1fr; }
+  
+  .banner { flex-direction: column; align-items: stretch; gap: 12px; }
+  .bpill { justify-content: space-between; }
+  .bprog { margin-top: 4px; }
+  .vchip { text-align: center; }
+  
+  .ph-h1 { font-size: 16px; }
+  .ph-sub { line-height: 1.4; }
+  .icon-box { width: 42px; height: 42px; font-size: 20px; }
+  
+  /* ปรับปุ่มในตารางให้เรียงแนวนอนบนมือถือ */
+  .sg { flex-direction: row; justify-content: center; flex-wrap: wrap; gap: 6px; }
+  .sb { width: auto; flex: 1; min-width: 50px; }
+  
+  .abar { justify-content: center; padding-bottom: 16px; }
+  .btn { flex: 1; text-align: center; }
+  .anote { text-align: center; width: 100%; margin-top: 8px; margin-left: 0; }
+  
+  .vbox { flex-direction: column; text-align: center; gap: 8px; }
+}
+
+/* ── PRINT STYLES ── */
 @media print{  
-  .abar .btn-d,.abar .btn-s{display:none;}  
+  .abar, .ph-icon {display:none;}  
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}  
-  /* ปรับให้ Textarea ขยายตามเนื้อหาขณะพิมพ์ */
+  .tw { padding: 0; overflow-x: visible; }
   .ri{
       border:1px solid #ccc;
       height:auto !important;
