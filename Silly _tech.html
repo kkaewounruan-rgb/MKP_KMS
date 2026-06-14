@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"  content="สรุปเนื้อหา Silly Technical — ความรู้ทางเทคนิคอลแบบ 3 Dimensions: Price, Volume และ Indicator เขียนโดย poy">
+  <meta name="author"       content="poy">
+  <meta name="keywords"     content="technical analysis, เทคนิคอล, หุ้น, Elliott Wave, Darvas Box, Dow Theory, RSI, MACD, Stochastic, Volume">
+  <meta property="og:title"       content="Silly Technical — สรุปเนื้อหา 3 Dimensions of Trading">
+  <meta property="og:description" content="Price · Volume · Indicator ฉบับกระชับ เข้าใจง่าย เขียนจากประสบการณ์จริง">
+  <meta property="og:type"        content="article">
+  <title>Silly Technical — สรุปเนื้อหา</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ═══════════════════════════════════════════
+       DESIGN TOKENS — Dark (default)
+    ═══════════════════════════════════════════ */
+    :root {
+      --bg:       #0D1B2A;
+      --surface:  #152232;
+      --surface2: #1E3045;
+      --border:   #243B52;
+      --teal:     #00C8A8;
+      --teal-dim: rgba(0,200,168,0.12);
+      --red:      #FF5C6A;
+      --red-dim:  rgba(255,92,106,0.10);
+      --gold:     #FFD166;
+      --gold-dim: rgba(255,209,102,0.12);
+      --text:     #D8E8F4;
+      --muted:    #6B8AA3;
+      --heading:  #EEF5FB;
+      --tag-bg:   #1A3044;
+      --hero-bg1: #152232;
+      --hero-bg2: #0a1520;
+      --shadow:   rgba(0,0,0,0.4);
+    }
+
+    /* ═══════════════════════════════════════════
+       DESIGN TOKENS — Light override
+    ═══════════════════════════════════════════ */
+    [data-theme="light"] {
+      --bg:       #F0F5FA;
+      --surface:  #FFFFFF;
+      --surface2: #E8EEF6;
+      --border:   #C5D4E3;
+      --teal:     #007A66;
+      --teal-dim: rgba(0,122,102,0.10);
+      --red:      #CC2B3A;
+      --red-dim:  rgba(204,43,58,0.08);
+      --gold:     #9A6E00;
+      --gold-dim: rgba(154,110,0,0.09);
+      --text:     #1C2D3E;
+      --muted:    #5A7A96;
+      --heading:  #0E1E2E;
+      --tag-bg:   #DDE9F4;
+      --hero-bg1: #E2EBF5;
+      --hero-bg2: #D0DEEE;
+      --shadow:   rgba(0,0,0,0.15);
+    }
+
+    /* ═══════════════════════════════════════════
+       RESET
+    ═══════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      transition: background 0.25s, color 0.25s;
+    }
+
+    /* ═══════════════════════════════════════════
+       UTILITY CLASSES
+    ═══════════════════════════════════════════ */
+    .text-highlight { color: var(--text); }
+    .text-teal      { color: var(--teal); }
+    .text-red       { color: var(--red);  }
+    .text-gold      { color: var(--gold); }
+
+    .mt-sm { margin-top: 14px; }
+    .mt-md { margin-top: 20px; }
+    .mt-lg { margin-top: 28px; }
+    .mb-sm { margin-bottom: 14px; }
+    .mb-md { margin-bottom: 20px; }
+
+    .card p + p { margin-top: 8px; }
+
+    .bullet-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-top: 6px;
+    }
+    .bullet-list li::before    { content: '•'; color: var(--teal); margin-right: 6px; }
+    .card.gold .bullet-list li::before { color: var(--gold); }
+    .card.red  .bullet-list li::before { color: var(--red);  }
+
+    .nav-label-bottom { margin-top: auto; padding-top: 24px; }
+
+    /* ═══════════════════════════════════════════
+       CONTROLS BAR (Theme + Hamburger + Mode badge)
+    ═══════════════════════════════════════════ */
+    .controls {
+      position: fixed;
+      top: 14px;
+      right: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 300;
+    }
+
+    .ctrl-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 17px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+    .ctrl-btn:hover  { background: var(--surface2); border-color: var(--teal); transform: translateY(-1px); }
+    .ctrl-btn:active { transform: translateY(0); }
+
+    /* hamburger hidden on desktop, visible on tablet/mobile */
+    .btn-menu { display: none; }
+
+    /* mode badge — text set via CSS content */
+    .mode-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 5px 10px;
+      letter-spacing: 0.06em;
+      box-shadow: 0 2px 8px var(--shadow);
+      white-space: nowrap;
+    }
+    .mode-badge::before { content: '🖥  Desktop'; }
+
+    /* ═══════════════════════════════════════════
+       NAV OVERLAY (tablet/mobile backdrop)
+    ═══════════════════════════════════════════ */
+    .nav-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 99;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.28s, visibility 0.28s;
+    }
+    .nav-overlay.overlay-visible { opacity: 1; visibility: visible; }
+    [data-theme="light"] .nav-overlay { background: rgba(0,0,0,0.3); }
+
+    /* ═══════════════════════════════════════════
+       SIDEBAR
+    ═══════════════════════════════════════════ */
+    nav {
+      position: fixed;
+      top: 0; left: 0;
+      width: 260px;
+      height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform 0.28s cubic-bezier(0.4,0,0.2,1),
+                  background 0.25s, border-color 0.25s,
+                  box-shadow 0.28s;
+    }
+    nav::-webkit-scrollbar       { width: 4px; }
+    nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .nav-brand {
+      padding: 24px 20px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand .candles {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      margin-bottom: 10px;
+      height: 28px;
+    }
+    .candle { width: 8px; border-radius: 1px; position: relative; }
+    .candle::before, .candle::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 1.5px;
+      background: inherit;
+    }
+    .c1 { background: var(--teal); height: 14px; }
+    .c2 { background: var(--red);  height: 22px; }
+    .c3 { background: var(--teal); height: 28px; }
+    .c4 { background: var(--teal); height: 18px; }
+    .c5 { background: var(--red);  height: 10px; }
+    .c6 { background: var(--teal); height: 24px; }
+    .c1::before { height: 4px; top:    -4px; }
+    .c2::after  { height: 5px; bottom: -5px; }
+    .c3::before { height: 5px; top:    -5px; }
+    .c3::after  { height: 4px; bottom: -4px; }
+    .c4::before { height: 3px; top:    -3px; }
+    .c6::before { height: 6px; top:    -6px; }
+    .c6::after  { height: 3px; bottom: -3px; }
+
+    .nav-brand h1 {
+      font-size: 14px; font-weight: 600;
+      color: var(--teal);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .nav-brand p { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .nav-section-label {
+      font-size: 10px; font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 16px 20px 6px;
+    }
+    nav a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 20px;
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .15s, background .15s;
+      border-left: 2px solid transparent;
+    }
+    nav a:hover           { color: var(--text); background: var(--teal-dim); border-left-color: var(--teal); }
+    nav a .dot            { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; background: var(--border); }
+    nav a:hover .dot      { background: var(--teal); }
+
+    .dim-label {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 20px;
+      font-size: 11px; font-weight: 600;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: var(--gold-dim);
+      margin: 6px 0 2px;
+      border-left: 2px solid var(--gold);
+    }
+
+    /* ═══════════════════════════════════════════
+       MAIN
+    ═══════════════════════════════════════════ */
+    main  { margin-left: 260px; flex: 1; padding: 0; }
+    footer {
+      margin-left: 260px;
+      border-top: 1px solid var(--border);
+      padding: 24px 56px;
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      transition: border-color 0.25s;
+    }
+
+    /* ═══════════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════════ */
+    .hero {
+      background: linear-gradient(135deg, var(--hero-bg1) 0%, var(--hero-bg2) 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 56px 56px 48px;
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .hero-eyebrow {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; color: var(--teal);
+      letter-spacing: 0.18em; text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .hero h2 {
+      font-size: 36px; font-weight: 600; line-height: 1.2;
+      color: var(--heading); margin-bottom: 14px;
+    }
+    .hero p  { font-size: 15px; color: var(--muted); max-width: 540px; line-height: 1.7; }
+    .hero-meta { display: flex; gap: 16px; margin-top: 28px; flex-wrap: wrap; }
+    .meta-chip {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--muted);
+      background: var(--surface2); border: 1px solid var(--border);
+      padding: 5px 12px; border-radius: 20px;
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .meta-chip span { color: var(--teal); font-weight: 600; }
+
+    /* ═══════════════════════════════════════════
+       CONTENT
+    ═══════════════════════════════════════════ */
+    .content { padding: 48px 56px 80px; max-width: 860px; }
+    .section { margin-bottom: 64px; }
+
+    .section-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 24px; padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      transition: border-color 0.25s;
+    }
+    .section-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .icon-teal { background: var(--teal-dim); color: var(--teal); }
+    .icon-red  { background: var(--red-dim);  color: var(--red);  }
+    .icon-gold { background: var(--gold-dim); color: var(--gold); }
+
+    .section-header h3   { font-size: 20px; font-weight: 600; color: var(--heading); }
+    .section-header .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* dim badge */
+    .dim-badge {
+      margin-left: auto;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; font-weight: 500;
+      letter-spacing: 0.08em; padding: 3px 9px; border-radius: 4px;
+    }
+    .badge-price { background: var(--teal-dim); color: var(--teal); border: 1px solid rgba(0,200,168,.25); }
+    .badge-vol   { background: var(--gold-dim);  color: var(--gold); border: 1px solid rgba(255,209,102,.25); }
+    .badge-ind   { background: var(--red-dim);   color: var(--red);  border: 1px solid rgba(255,92,106,.25); }
+
+    /* ═══════════════════════════════════════════
+       CARD GRID
+    ═══════════════════════════════════════════ */
+    .cards       { display: grid; grid-template-columns: 1fr 1fr;     gap: 14px; }
+    .cards.three { grid-template-columns: 1fr 1fr 1fr; }
+    .cards.one   { grid-template-columns: 1fr; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+    .card.teal::before { background: var(--teal); }
+    .card.red::before  { background: var(--red);  }
+    .card.gold::before { background: var(--gold); }
+
+    .card h4 { font-size: 13px; font-weight: 600; color: var(--heading); margin-bottom: 8px; }
+    .card p  { font-size: 13px; color: var(--muted); line-height: 1.65; }
+    .card .tag {
+      display: inline-block;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px; background: var(--tag-bg); color: var(--teal);
+      padding: 2px 7px; border-radius: 3px; margin-bottom: 8px;
+      transition: background 0.25s;
+    }
+    .card.gold .tag { color: var(--gold); }
+    .card.red  .tag { color: var(--red);  }
+
+    /* ═══════════════════════════════════════════
+       RULE LIST
+    ═══════════════════════════════════════════ */
+    .rule-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .rule-list li { display: flex; gap: 12px; font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+    .rule-list .num {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; color: var(--teal);
+      background: var(--teal-dim); border-radius: 4px;
+      padding: 2px 7px; flex-shrink: 0;
+      height: fit-content; margin-top: 2px;
+    }
+
+    /* ═══════════════════════════════════════════
+       QUOTE BOX
+    ═══════════════════════════════════════════ */
+    .quote-box {
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--gold);
+      background: var(--gold-dim);
+      border-radius: 0 8px 8px 0;
+      padding: 16px 20px;
+      font-size: 13.5px; color: var(--text);
+      line-height: 1.7; font-style: italic;
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .quote-box cite {
+      display: block; font-style: normal;
+      font-size: 11px; color: var(--gold);
+      margin-top: 8px; font-family: 'IBM Plex Mono', monospace;
+    }
+
+    /* ═══════════════════════════════════════════
+       SPLIT LAYOUT
+    ═══════════════════════════════════════════ */
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+    /* ═══════════════════════════════════════════
+       INDICATOR TABLE
+    ═══════════════════════════════════════════ */
+    .ind-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 16px; }
+    .ind-table th {
+      background: var(--surface2); color: var(--muted);
+      font-weight: 500; font-size: 11px;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      text-align: left; padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.25s;
+    }
+    .ind-table td {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted); vertical-align: top; line-height: 1.55;
+      transition: background 0.25s;
+    }
+    .ind-table td:first-child    { color: var(--text); font-weight: 500; }
+    .ind-table tr:last-child td  { border-bottom: none; }
+    .ind-table tr:hover td       { background: var(--surface2); }
+
+    .pill      { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 10px; font-family: 'IBM Plex Mono', monospace; vertical-align: middle; }
+    .pill-up   { background: var(--teal-dim); color: var(--teal); }
+    .pill-down { background: var(--red-dim);  color: var(--red);  }
+    .pill-side { background: var(--gold-dim); color: var(--gold); }
+
+    /* ═══════════════════════════════════════════
+       WAVE ROW
+    ═══════════════════════════════════════════ */
+    .wave-row  { display: flex; margin: 20px 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; transition: border-color 0.25s; }
+    .wave-cell { flex: 1; padding: 14px 12px; border-right: 1px solid var(--border); font-size: 12px; color: var(--muted); line-height: 1.5; transition: border-color 0.25s; }
+    .wave-cell:last-child { border-right: none; }
+    .wave-cell .wn { font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .w1 .wn { color: #7ECFFF; }
+    .w2 .wn { color: var(--red); }
+    .w3 .wn { color: var(--teal); font-size: 20px; }
+    .w4 .wn { color: var(--muted); }
+    .w5 .wn { color: var(--gold); }
+
+    /* ═══════════════════════════════════════════
+       TIP BOX
+    ═══════════════════════════════════════════ */
+    .tip {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px 18px;
+      font-size: 13px; color: var(--muted); line-height: 1.65;
+      display: flex; gap: 10px; margin: 16px 0;
+      transition: background 0.25s, border-color 0.25s;
+    }
+    .tip-icon { font-size: 16px; flex-shrink: 0; }
+
+    /* ═══════════════════════════════════════════
+       BACK-TO-TOP
+    ═══════════════════════════════════════════ */
+    a.back-top {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--muted);
+      text-decoration: none; margin-top: 24px;
+    }
+    a.back-top:hover { color: var(--teal); }
+
+    /* ═══════════════════════════════════════════
+       RESPONSIVE — TABLET / iPad  (≤1024px)
+    ═══════════════════════════════════════════ */
+    @media (max-width: 1024px) {
+      /* show hamburger, update mode badge */
+      .btn-menu { display: flex; }
+      .mode-badge::before { content: '📱 Tablet'; }
+
+      /* sidebar slides in from left */
+      nav {
+        transform: translateX(-100%);
+        box-shadow: none;
+        z-index: 200;
+      }
+      nav.nav-open {
+        transform: translateX(0);
+        box-shadow: 4px 0 32px var(--shadow);
+      }
+
+      /* main occupies full width */
+      main   { margin-left: 0; }
+      footer { margin-left: 0; padding: 20px 32px; }
+
+      /* content padding */
+      .hero    { padding: 40px 40px 32px; }
+      .content { padding: 36px 40px 60px; max-width: 100%; }
+
+      /* 3-col becomes 2-col */
+      .cards.three { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ═══════════════════════════════════════════
+       RESPONSIVE — MOBILE  (≤767px)
+    ═══════════════════════════════════════════ */
+    @media (max-width: 767px) {
+      /* mode badge */
+      .mode-badge::before { content: '📱 Mobile'; }
+
+      /* hero */
+      .hero            { padding: 72px 20px 28px; }
+      .hero h2         { font-size: 26px; }
+      .hero p          { font-size: 14px; }
+      .hero-meta       { gap: 8px; }
+      .hero-eyebrow    { font-size: 10px; }
+
+      /* content */
+      .content         { padding: 24px 16px 48px; }
+      .section         { margin-bottom: 48px; }
+      .section-header h3 { font-size: 17px; }
+
+      /* all grids single column */
+      .cards,
+      .cards.three,
+      .split           { grid-template-columns: 1fr; }
+
+      /* wave row stacks vertically */
+      .wave-row        { flex-direction: column; }
+      .wave-cell       { border-right: none; border-bottom: 1px solid var(--border); }
+      .wave-cell:last-child { border-bottom: none; }
+
+      /* table compact */
+      .ind-table       { font-size: 11.5px; }
+      .ind-table th,
+      .ind-table td    { padding: 8px 10px; }
+
+      /* footer */
+      footer {
+        padding: 16px 20px;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 11px;
+      }
+
+      /* dim-badge hide on small */
+      .dim-badge { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── CONTROLS ─────────────────────────── -->
+  <div class="controls" role="toolbar" aria-label="ตัวควบคุม">
+    <button class="ctrl-btn btn-menu" id="menuBtn"
+            onclick="toggleSidebar()" aria-label="เปิด/ปิดเมนู" title="เมนู">
+      ☰
+    </button>
+    <span class="mode-badge" aria-hidden="true"></span>
+    <button class="ctrl-btn btn-theme" id="themeBtn"
+            onclick="toggleTheme()" title="เปลี่ยนธีม" aria-label="เปลี่ยนโหมดสว่าง/มืด">
+      <span id="themeIcon">☀️</span>
+    </button>
+  </div>
+
+  <!-- ── OVERLAY ───────────────────────────── -->
+  <div class="nav-overlay" id="navOverlay" onclick="closeSidebar()" aria-hidden="true"></div>
+
+  <!-- ── SIDEBAR ───────────────────────────── -->
+  <nav id="mainNav" aria-label="เมนูนำทาง">
+    <div class="nav-brand">
+      <div class="candles" aria-hidden="true">
+        <div class="candle c1"></div>
+        <div class="candle c2"></div>
+        <div class="candle c3"></div>
+        <div class="candle c4"></div>
+        <div class="candle c5"></div>
+        <div class="candle c6"></div>
+      </div>
+      <h1>Silly Technical</h1>
+      <p>สรุปเนื้อหาโดย poy</p>
+    </div>
+
+    <div class="nav-section-label">เนื้อหา</div>
+    <a href="#intro"><div class="dot"></div>บทนำ</a>
+
+    <div class="dim-label">📊 1st — Price</div>
+    <a href="#charts"><div class="dot"></div>ประเภทชาร์ต</a>
+    <a href="#candle-pattern"><div class="dot"></div>Candle Pattern</a>
+    <a href="#chart-pattern"><div class="dot"></div>Chart Pattern</a>
+    <a href="#support-resistance"><div class="dot"></div>แนวรับ–แนวต้าน</a>
+    <a href="#dow"><div class="dot"></div>Dow Theory</a>
+    <a href="#darvas"><div class="dot"></div>Darvas Box</a>
+    <a href="#elliott"><div class="dot"></div>Elliott Wave</a>
+
+    <div class="dim-label">📦 2nd — Volume</div>
+    <a href="#volume-basics"><div class="dot"></div>Volume คืออะไร</a>
+    <a href="#smart-money"><div class="dot"></div>Smart Money &amp; Stage</a>
+    <a href="#volume-setup"><div class="dot"></div>Setup จาก Volume</a>
+
+    <div class="dim-label">🔬 3rd — Indicators</div>
+    <a href="#indicator-types"><div class="dot"></div>ประเภท Indicator</a>
+    <a href="#ma"><div class="dot"></div>Moving Average</a>
+    <a href="#macd"><div class="dot"></div>MACD</a>
+    <a href="#rsi"><div class="dot"></div>RSI</a>
+    <a href="#stochastic"><div class="dot"></div>Stochastic</a>
+
+    <div class="nav-section-label nav-label-bottom">สรุป</div>
+    <a href="#summary"><div class="dot"></div>Key Takeaways</a>
+  </nav>
+
+  <!-- ═══════════════════════════════ MAIN ══ -->
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <p class="hero-eyebrow">// สรุปเนื้อหา · Technical Analysis Handbook</p>
+      <h2>Silly Technical<br>3 Dimensions of Trading</h2>
+      <p>ความรู้ทางเทคนิคอลจากมุมมองของผู้เทรดจริง รวบรวมเป็น 3 มิติ ได้แก่ Price, Volume และ Indicator เขียนด้วยภาษาบ้านๆ เข้าใจง่าย</p>
+      <div class="hero-meta">
+        <div class="meta-chip"><span>3</span> Dimensions</div>
+        <div class="meta-chip"><span>63</span> หน้า</div>
+        <div class="meta-chip"><span>By</span> poy</div>
+      </div>
+    </section>
+
+    <div class="content">
+
+      <!-- ── INTRO ─────────────────────── -->
+      <section id="intro" class="section">
+        <div class="section-header">
+          <div class="section-icon icon-teal">📖</div>
+          <div><h3>บทนำ</h3><div class="sub">Introduction</div></div>
+        </div>
+        <div class="cards one">
+          <div class="card teal">
+            <div class="tag">Overview</div>
+            <h4>ที่มาของหนังสือเล่มนี้</h4>
+            <p>เป็นสรุปส่วนตัวจากการเรียนรู้และประสบการณ์จริงของผู้เขียน (poy) แบ่งออกเป็น 3 มิติหลัก คือ <strong class="text-highlight">Price · Volume · Indicator</strong></p>
+            <p>เขียนแบบบ้านๆ จากความเข้าใจส่วนตัว เหมาะสำหรับใช้ทบทวนและประกอบการตัดสินใจเทรดจริง</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── CHARTS ─────────────────────── -->
+      <section id="charts" class="section">
+        <div class="section-header">
+          <div class="section-icon icon-teal">📈</div>
+          <div><h3>ประเภทของชาร์ต</h3><div class="sub">Chart Types</div></div>
+          <div class="dim-badge badge-price">PRICE</div>
+        </div>
+        <div class="cards three">
+          <div class="card teal">
+            <div class="tag">Type 01</div>
+            <h4>Line Chart</h4>
+            <p>นำราคาปิดมา plot ต่อกัน ดูง่าย สบายตา</p>
+            <p>เหมาะสำหรับ <strong class="text-highlight">ตีเทรนไลน์</strong> และ <strong class="text-highlight">ฟิโบนาชี</strong> เพราะไม่ต้องเลือกว่าจะเอาไส้หรือไม่เอาไส้</p>
+          </div>
+          <div class="card teal">
+            <div class="tag">Type 02</div>
+            <h4>OHLC / Candlestick</h4>
+            <p>แสดง Open · High · Low · Close แสดงอารมณ์ตลาดได้ดี</p>
+            <p>แท่งเขียว = ราคาปิด &gt; ราคาเปิด · แท่งแดง = ราคาปิด &lt; ราคาเปิด</p>
+          </div>
+          <div class="card gold">
+            <div class="tag">Type 03</div>
+            <h4>Special Chart (TLB)</h4>
+            <p><strong class="text-highlight">Three Line Break</strong> — ไม่ Fix แกน X (เวลา) สร้างแท่งใหม่เฉพาะเมื่อราคา New High</p>
+            <p>ช่วยกรอง Sideway ออก หาแนวรับแนวต้านได้ง่ายขึ้น</p>
+          </div>
+        </div>
+        <div class="tip">
+          <span class="tip-icon">💡</span>
+          <span><strong>เคล็ดลับ:</strong> ใช้ Line Chart สำหรับตีเทรนไลน์/ฟิโบ เพราะไม่ต้องกังวลเรื่อง bias จากไส้เทียน ใช้ Candlestick สำหรับอ่านอารมณ์ตลาดรายวัน</span>
+        </div>
+        <a class="back-top" href="#intro">↑ กลับด้านบน</a>
+      </section>
+
+      <!-- ── CANDLE PATTERN ──────────────── -->
+      <section id="candle-pattern" class="section">
+        <div class="section-header">
+          <div class="section-icon icon-teal">🕯️</div>
+          <div><h3>Candle Pattern</h3><div class="sub">รูปแบบแท่งเทียน</div></div>
+          <div class="dim-badge badge-price">PRICE</div>
+        </div>
+        <div class="cards">
+          <div class="card teal">
+            <div class="tag">Two Bars</div>
+            <h4>Engulfing Pattern</h4>
+            <p><strong class="text-highlight">Bullish Engulfing:</strong> แท่งขาว (กระทิง) กลืนแท่งดำก่อนหน้า → สัญญาณซื้อ</p>
+            <p><strong class="text-red">Bearish Engulfing (หมีคลุม):</strong> แท่งดำกลืนแท่งขาว → ระวังราคาลง</p>
+          </div>
+          <div class="card teal">
+            <div class="tag">Three Bars</div>
+            <h4>Star Pattern (ท่าเก็บสบู่)</h4>
+            <p>รูปแบบ Reversal ที่นิยมมาก ประกอบด้วย</p>
+            <ol class="bullet-list">
+              <li>แท่ง Bearish ขนาดใหญ่</li>
+              <li>Doji (แท่งสั้น — ลังเล)</li>
+              <li>แท่ง Bullish วิ่งเกิน 50% ของแท่งดำ</li>
+            </ol>
+          </div>
+        </div>
+        <div class="cards mt-sm">
+          <div class="card gold">
+            <div class="tag">Climax</div>
+            <h4>Climax Selling / Buying</h4>
+            <p>เมื่อแท่งเทียนยาวต่อเนื่องหลายแท่ง แล้วเกิด Volume ทะลักผิดปกติ</p>
+            <p>อาจเป็นสัญญาณว่าเจ้ามือช้อน (<strong class="text-highlight">Climax Selling</strong>) หรือระบาย (<strong class="text-highlight">Climax Buying</strong>)</p>
+          </div>
+          <div class="card red">
+            <div class="tag">⚠️ ข้อควรระวัง</div>
+            <h4>อย่ายึดติดรูปแบบ</h4>
+            <p>แท่งเทียนเดียวไม่เพียงพอต่อการตัดสินใจ</p>
+            <p>ควรใช้กลุ่มแท่งเทียนและดูประกอบกับ Volume เสมอ ตลาดไม่ได้ทำตามตำราทุกครั้ง</p>
+          </div>
+        </div>
+        <a class="back-top" href="#intro">↑ กลับด้านบน</a>
+      </section>
+
+      <!-- ── CHART PATTERN ───────────────── -->
+      <section id="chart-pattern" class="section">
+        <div class="section-header">
+          <div class="section-icon icon-teal">🔷</div>
+          <div><h3>Chart Pattern</h3><div class="sub">รูปแบบกราฟ</div></div>
+          <div class="dim-badge badge-price">PRICE</div>
+        </div>
+        <div class="split">
+          <div class="card teal">
+            <div class="tag">ประเภท 1</div>
+            <h4>Continuation Pattern</h4>
+            <p>เมื่อเกิดแพทเทิร์นเหล่านี้ ราคามักแหกไปในทิศทางเดิมของเทรน</p>
+            <ul class="bullet-list">
+              <li>สามเหลี่ยม (Triangle)</li>
+              <li>เพชร (Diamond)</li>
+              <li>ถ้วย (Cup &amp; Handle)</li>
+              <li>ธง (Flag)</li>
+            </ul>
+          </div>
+          <div class="card red">
+            <div class="tag">ประเภท 2</div>
+            <h4>Reversal Pattern</h4>
+            <p>เมื่อเกิดแพทเทิร์นเหล่านี้ ราคามีโอกาสกลับตัว ควรดู Indicator ประกอบ</p>
+            <ul class="bullet-list">
+              <li>Head &amp; Shoulder (หัว ไหล่ ตูด)</li>
+              <li>Wedge</li>
+              <li>Double / Triple Top/Bottom</li>
+            </ul>
+          </div>
+        </div>
+        <div class="tip">
+          <span class="tip-icon">🎯</span>
+          <span><strong>ความสำคัญที่แท้จริง</strong>อยู่ที่จังหวะ <strong class="text-teal">Break Out</strong> — เมื่อเบรกแล้ว สามารถวัดเป้าด้วยฟิโบนาชีได้ ยิ่ง TF ใหญ่ยิ่งรุนแรง</span>
+        </div>
+        <a class="back-top" href="#intro">↑ กลับด้านบน</a>
+      </section>
+
+      <!-- ── S&R ─────────────────────────── -->
+      <section id="support-resistance" class="section">
+        <div class="section-header">
+          <div class="section-icon icon-teal">🛡️</div>
+          <div><h3>แนวรับ – แนวต้าน</h3><div class="sub">Support &amp; Resistance</div></div>
+          <div class="dim-badge badge-price">PRICE</div>
+        </div>
+        <div class="quote-box">
+          "ยิ่งแนวไหนที่ราคาชนแล้วไม่ผ่านบ่อยๆ นั่นแหล่ะคือแนวต้านที่สำคัญ"
+          <cite>— poy, Silly Technical</cite>
+        </div>
+        <div class="cards mt-md">
+          <div class="card teal">
+            <div class="tag">หลักการ</div>
+            <h4>ยิ่งทดสอบมากยิ่งขลัง</h4>
+            <p>เส้นที่ลากผ่านจุดสูงสุด-ต่ำสุดหลายๆ จุดจะมีนัยสำคัญมากกว่า</p>
+            <p>ไม่จำเป็นต้องเป๊ะที่จุดปลายไส้ เอาเฉลี่ยหลายจุดดีกว่า</p>
+          </div>
+          <div class="card gold">
+            <div class="tag">Role Reversal</div>
+            <h4>แนวต้านกลายเป็นแนวรับ</h4>
+            <p>เมื่อราคาแหกแนวต้านผ่านได้ แนวนั้นจะกลับกลายเป็น <strong class="text-highlight">แนวรับ</strong> ทันที</p>
+            <p>เทรดเดอร์เก๋ๆ มักใช้ตรงนี้เป็นจุด Stop Loss</p>
+          </div>
+        </div>
+        <div class="cards mt-sm">
+          <div class="card teal">
+            <div class="tag">ประเภท</div>
+            <h4>ไม่ใช่แค่เส้นแนวนอน</h4>
+            <ul class="bullet-list">
+              <li>Trend Line &amp; Channel</li>
+              <li>EMA (เช่น EMA 200)</li>
+              <li>Fibonacci Levels</li>
+              <li>Price Pattern Boundaries</li>
+            </ul>
+          </div>
+          <div class="card teal">
+            <div class="tag">การใช้งาน</div>
+            <h4>Trading Range</h4>
+            <p>ใช้กรอบ Trading Range ในการสวิงเทรด รับที่แนวรับ (30% ก่อน)</p>
+            <p>รอสัญญาณกลับตัวยืนยัน (Star Pattern / Indicator) ค่อยเพิ่ม position</p>
+          </div>
+        </div>
+        <a class="back-top" href="#intro">↑ กลับด้านบน</a>
+      </section>
+
+      <!-- ── DOW THEORY ──────────────────── -->
+      <section id="dow" class="section">
+        <div class="section-header">
+          <div class="section-icon icon-teal">⚖️</div>
+          <div><h3>Dow Theory — Charles Dow</h3><div class="sub">1st "D" — Trend Following Foundation</div></div>
+          <div class="dim-badge badge-price">PRICE</div>
+        </div>
+        <div class="cards mb-md">
+          <div class="card teal">
+            <div class="tag">3 Movement</div>
+            <h4>การเคลื่อนไหว 3 ระดับ</h4>
+            <ul class="bullet-list">
+              <li><strong class="text-highlight">Primary Trend:</strong> เทรนหลัก (TF ใหญ่กว่าที่เทรด)</li>
+              <li><strong class="text-highlight">Secondary Trend:</strong> ช่วงปรับฐาน (ช่วงเก็บของ)</li>
+              <li><strong class="text-highlight">Minor Trend:</strong> ความผันผวนย่อยๆ</li>
+            </ul>
+          </div>
+          <div class="card gold">
+            <div class="tag">3 Phases</div>
+            <h4>Bull Market 3 เฟส</h4>
+            <ul class="bullet-list">
+              <li><strong class="text-highlight">Accumulation:</strong> หุ้นซึมๆ เจ้ามือเก็บ</li>
+              <li><strong class="text-highlight">Public Participation:</strong> Big Move วอลุ่มพีค</li>
+              <li><strong class="text-highlight">Distribution:</strong> เจ้ามือระบาย รายย่อยรับของ</li>
+            </ul>
+          </div>
+        </div>
+        <ul class="rule-list">
+          <li><div class="num">01</div><div>ทุกอย่าง (อารมณ์ ข่าว เป้า ความกลัว) ถูก<strong>สะท้อนออกมาเป็นราคา</strong>หมดแล้ว</div></li>
+          <li><div class="num">02</div><div>ตลาดมีการเคลื่อนไหว <strong>3 แบบ</strong> ต้องมองภาพใหญ่ให้กระจ่างก่อนว่าอยู่ตรงไหน</div></li>
+          <li><div class="num">03</div><div>ตลาดประกอบด้วย <strong>3 Phases</strong> (Accumulation → PP → Distribution)</div></li>
+          <li><div class="num">04</div><div>ค่าเฉลี่ยของแต่ละอุตสาหกรรม<strong>ต้องช่วยยืนยัน</strong>ซึ่งกันและกัน</div></li>
+          <li><div class="num">05</div><div><strong>Volume ช่วยยืนยัน</strong>แนวโน้ม — ราคาขึ้นต้องมีวอลุ่มตาม</div></li>
+          <li><div class="num">06</div><div>เทรนจะดำเนินไปจนกว่าจะมีการ<strong>ยืนยันการเปลี่ยนแปลง</strong> (หลุด Neckline, ตกเทรนไลน์, ไม่สร้าง HH ใหม่)</div></li>
+        </ul>
+        <a class="back-top" href="#intro">↑ กลับด้านบน</a>
+      </section>
+
+      <!-- ── DARVAS ──────────────────────── -->
+      <section id="darvas" class="section">
+        <div class="section-header">
+          <div class="section-icon icon-gold">📦</div>
+          <div><h3>Darvas Box — Nicholas Darvas</h3><div class="sub">2nd "D" — Techno-Fundamental System</div></div>
+          <div class="dim-badge badge-price">PRICE</div>
+        </div>
+        <div class="quote-box">
+          "It's not about logic, company results, or mathematics — but emotion. When emotion and logic collide, emotion will always come out ahead."
+          <cite>— Nicholas Darvas</cite>
+        </div>
+        <div class="cards three mt-md">
+          <div class="card gold">
+            <div class="tag">Step 1</div>
+            <h4>หาหุ้นที่ใช่</h4>
+            <p>หุ้นที่มีความผันผวนสูง ไม่ใช่ Big Cap หลับนาน</p>
+            <p>และอยู่บน<strong class="text-highlight">ความคาดหวังของตลาด</strong> (Expected Earnings)</p>
+          </div>
+          <div class="card gold">
+            <div class="tag">Step 2</div>
+            <h4>ตีกรอบ (Box)</h4>
+            <p>หา<strong class="text-highlight">จุดสูงสุดอ้างอิง</strong> (แนวต้านเก่า) และ<strong class="text-highlight">แนวรับข้างล่าง</strong></p>
+            <p>จากการสังเกตการพักตัวของหุ้น → ได้กรอบ Darvas Box</p>
+          </div>
+          <div class="card gold">
+            <div class="tag">Step 3</div>
+            <h4>รอ Break กล่อง</h4>
+            <p><strong class="text-highlight">ไม่เทรดจนกว่ามันจะทะลุกล่อง</strong></p>
+            <p>รถคันนั้นต้องมีเราเสมอ ใช้ก้นกล่องเป็น Stop Loss เสมอ</p>
+          </div>
+        </div>
+        <div class="tip">
+          <span class="tip-icon">🏆</span>
+          <span>Darvas Box คือ <strong>Complete System</strong> — ใช้ได้ทุก TF ประยุกต์กับ Money Management ได้ efinancethai.com มีเครื่องมือ Darvas Box ให้ใช้ฟรี</span>
+        </div>
+        <a class="back-top" href="#intro">↑ กลับด้านบน</a>
+      </section>
+
+      <!-- ── ELLIOTT WAVE ─────────────────── -->
+      <section id="elliott" class="section">
+        <div class="section-header">
+          <div class="section-icon icon-teal">🌊</div>
+          <div><h3>Elliott Wave</h3><div class="sub">Ralph Nelson Elliott — Ride on Huge Emotion</div></div>
+          <div class="dim-badge badge-price">PRICE</div>
+        </div>
+        <div class="cards mb-md">
+          <div class="card teal">
+            <div class="tag">Wave Type 1</div>
+            <h4>Impulse Wave (5 คลื่น)</h4>
+            <p>คลื่นที่มีการกระทืบคันเร่ง — มีความแรงและเร็ว</p>
+            <p><strong class="text-highlight">ไม่ต้องอยู่ในขาขึ้นเสมอไป</strong> ประกอบด้วยคลื่น 1-2-3-4-5</p>
+          </div>
+          <div class="card red">
+            <div class="tag">Wave Type 2</div>
+            <h4>Corrective Wave (3 คลื่น)</h4>
+            <p>คลื่นที่เคลื่อนที่เป็นเทรนได้ <strong class="text-red">แต่ไม่ได้กระทืบคันเร่ง</strong></p>
+            <p>วิ่งได้ไกลมาก อย่าเรียกว่า "คลื่นปรับฐาน" เพียงอย่างเดียว ประกอบด้วย a-b-c</p>
+          </div>
+        </div>
+        <div class="wave-row">
+          <div class="wave-cell w1"><div class="wn">W1</div><p>กลุ่มเล็กได้ข่าวอินไซด์ เจ้ามือไล่ราคาให้คนดอยคายของ</p></div>
+          <div class="wave-cell w2"><div class="wn">W2</div><p>คนดอยและเดย์เทรดขายลง ส่วนใหญ่ออกข้างมากกว่าตบลึก</p></div>
+          <div class="wave-cell w3"><div class="wn">W3</div><p>★ ชุดที่แรงที่สุด ข่าวกลายเป็น Line Flow วอลุ่มพีค Break Away Gap</p></div>
+          <div class="wave-cell w4"><div class="wn">W4</div><p>Trader ขายทำกำไร แต่คนตกรถคอยดัน ราคาไม่ตกมาก</p></div>
+          <div class="wave-cell w5"><div class="wn">W5</div><p>ถนนทุกสายมุ่งสู่หุ้นตัวนั้น จากอารมณ์ "กลัวตกรถ" ล้วนๆ</p></div>
+        </div>
+        <div class="tip">
+          <span class="tip-icon">🎯</span>
+          <span>วิธีง่ายๆ: ถ้าราคา <strong class="text-teal">แหก Price Channel</strong> ได้ → อนุมานเป็น Wave 3 ทันที → วัดเป้าฟิโบ 261.8% ขึ้นไป</span>
+        </div>
+        <a class="back-top" href="#intro">↑ กลับด้านบน</a>
+      </section>
+
+      <!-- ── VOLUME BASICS ────────────────── -->
+      <section id="volume-basics" class="section">
+        <div class="section-header">
+          <div class="section-icon icon-gold">📦</div>
+          <div><h3>Volume คืออะไร</h3><div class="sub">Volume vs Value</div></div>
+          <div class="dim-badge badge-vol">VOLUME</div>
+        </div>
+        <div class="cards">
+          <div class="card gold">
+            <div class="tag">Volume</div>
+            <h4>ปริมาณหุ้น</h4>
+            <p><strong class="text-highlight">Volume = ปริมาณหุ้นที่มีการซื้อ-ขาย</strong></p>
+            <p>ใช้เปรียบเทียบหุ้นตัวเดียวกันกับตัวเอง เพื่อดูความผิดปกติของแรงซื้อขาย</p>
+          </div>
+          <div class="card gold">
+            <div class="tag">Value</div>
+            <h4>มูลค่าการซื้อขาย</h4>
+            <p><strong class="text-highlight">Value = Price × Volume</strong></p>
+            <p>ใช้ดูภาพรวมตลาดและเปรียบเทียบข้ามหุ้น เพราะ convert ให้เป็นหน่วย "บาท" เดียวกัน</p>
+          </div>
+        </div>
+        <div class="quote-box mt-md">
+          "รถยนต์ขับเคลื่อนได้ด้วยน้ำมันฉันใด ราคาหุ้นก็ขยับได้ด้วยแรงจากมวลชนฉันนั้น Indicator อาจช่วยให้รถดูดีมีชาติตระกูล แต่ไม่สามารถทำให้รถขับเคลื่อนได้เหมือนน้ำมัน"
+          <cite>— จานน้อย (อาจารย์น้อย)</cite>
+        </div>
+        <a class="back-top" href="#intro">↑ กลับด้านบน</a>
+      </section>
+
+      <!-- ── SMART MONEY ──────────────────── -->
+      <section id="smart-money" class="section">
+        <div class="section-header">
+          <div class="section-icon icon-gold">🧠</div>
+          <div><h3>Smart Money &amp; Stage</h3><div class="sub">Volume Spread Analysis (Tom Williams)</div></div>
+          <div class="dim-badge badge-vol">VOLUME</div>
+        </div>
+        <div class="cards three">
+          <div class="card gold">
+            <div class="tag">Stage 1</div>
+            <h4>Accumulation (Vol พึ่งเข้า)</h4>
+            <p>เจ้ามือเริ่มสะสม มีการกระตุกราคาเป็นระยะ</p>
+            <p>ให้คนดอยคายของ หุ้นซึมๆ ไม่มีข่าว</p>
+          </div>
+          <div class="card gold">
+            <div class="tag">Stage 2</div>
+            <h4>Break Out (Vol "แห้ง")</h4>
+            <p>ราคาเบรกออกจากกรอบ Sideway วอลุ่มต้องทะลักด้วย</p>
+            <p>ทั้งราคาและวอลุ่มต้องนิวไฮพร้อมกัน</p>
+          </div>
+          <div class="card gold">
+            <div class="tag">Stage 3</div>
+            <h4>Wave 3 (Vol อัด)</h4>
+            <p>ชุดที่แรงที่สุด เทียบได้กับ Wave 3.3 ของ Elliott</p>
+            <p>หรือ PP ใน Dow Theory วอลุ่มพีคอีกครั้ง</p>
+          </div>
+        </div>
+        <a class="back-top" href="#intro">↑ กลับด้านบน</a>
+      </section>
+
+      <!-- ── VOLUME SETUP ─────────────────── -->
+      <section id="volume-setup" class="section">
+        <div class="section-header">
+          <div class="section-icon icon-gold">🔎</div>
+          <div><h3>Setup จาก Volume</h3><div class="sub">จังหวะเข้า 3 แบบหลังเบรก</div></div>
+          <div class="dim-badge badge-vol">VOLUME</div>
+        </div>
+        <ul class="rule-list">
+          <li><div class="num">A</div><div><strong>เปิด Gap แล้ววิ่งหาย</strong> (บางระจัน) — เข้าดอกแรกที่เบรกไฮ เสี่ยงสุดแต่ทุนดีที่สุด</div></li>
+          <li><div class="num">B</div><div><strong>Spinner</strong> — แท่งเทียนสั้นๆ ป้อมๆ วอลุ่มมา แสดงความลังเล ราคาปิดยืนเหนือแท่งเบรก</div></li>
+          <li><div class="num">C</div><div><strong>Throw Back</strong> — ราคาโทรลกลับมาทดสอบไฮเก่า รอวอลุ่มใน TF 30 ยืนยัน แล้วค่อยเข้า (อาจารย์ธีร์ชอบท่านี้)</div></li>
+        </ul>
+        <div class="tip">
+          <span class="tip-icon">📊</span>
+          <span><strong>Volume แห้งที่ดี:</strong> วอลุ่มทั้งวันอยู่ที่ ~25% ของแท่งที่วอลุ่มพีค ใช้ MFI ใน TF 30 ช่วยดูจุด Oversold เพื่อจับจังหวะเข้าหลังตกรถ</span>
+        </div>
+        <a class="back-top" href="#intro">↑ กลับด้านบน</a>
+      </section>
+
+      <!-- ── INDICATOR TYPES ──────────────── -->
+      <section id="indicator-types" class="section">
+        <div class="section-header">
+          <div class="section-icon icon-red">🔬</div>
+          <div><h3>ประเภท Indicator</h3><div class="sub">Classification</div></div>
+          <div class="dim-badge badge-ind">INDICATOR</div>
+        </div>
+        <table class="ind-table">
+          <thead>
+            <tr>
+              <th>ประเภท</th><th>ตัวอย่าง</th><th>เหมาะกับ</th><th>ผลทดลอง 10 ปี</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Trend (ช้า)</td>
+              <td>MA, MACD</td>
+              <td><span class="pill pill-up">Uptrend</span></td>
+              <td>ดีที่สุดในตลาดขาขึ้น · ห่วยในไซด์เวย์</td>
+            </tr>
+            <tr>
+              <td>Momentum (เร็ว)</td>
+              <td>RSI, Stochastic, MFI</td>
+              <td><span class="pill pill-up">Uptrend</span> <span class="pill pill-side">Sideway</span></td>
+              <td>Stochastic ทำกำไรได้แม้ในไซด์เวย์</td>
+            </tr>
+            <tr>
+              <td>Buy &amp; Hold</td>
+              <td>ถือทิ้ง</td>
+              <td><span class="pill pill-up">Uptrend</span></td>
+              <td>ชนะ Indicator ทุกตัวในขาขึ้น · แพ้หนักในขาลง</td>
+            </tr>
+            <tr>
+              <td>ทุกตัว</td>
+              <td>—</td>
+              <td><span class="pill pill-down">Downtrend</span></td>
+              <td>❌ ไม่มี Indicator ใดช่วยได้ในขาลง</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="tip mt-md">
+          <span class="tip-icon">⚡</span>
+          <span><strong>บทเรียนสำคัญ:</strong> อย่าดันทุรังถือหุ้นในตลาดขาลง Indicator ไม่ใช่ยันต์กันเจ๊ง ถ้าตลาดเป็นเทรน ทุก Indicator ช่วยได้ — ถ้าไม่เป็นเทรนก็ลืมมันไปได้เลย</span>
+        </div>
+        <a class="back-top" href="#intro">↑ กลับด้านบน</a>
+      </section>
+
+      <!-- ── MA ──────────────────────────── -->
+      <section id="ma" class="section">
+        <div class="section-header">
+          <div class="section-icon icon-red">〰️</div>
+          <div><h3>Moving Average (MA)</h3><div class="sub">Trend Indicator</div></div>
+          <div class="dim-badge badge-ind">INDICATOR</div>
+        </div>
+        <div class="cards three mb-md">
+          <div class="card red">
+            <div class="tag">SMA</div>
+            <h4>Simple MA</h4>
+            <p>ให้น้ำหนักทุกวันเท่ากัน ตอบสนองช้า เหมาะดูภาพรวมระยะยาว</p>
+          </div>
+          <div class="card red">
+            <div class="tag">EMA ★</div>
+            <h4>Exponential MA</h4>
+            <p>ให้น้ำหนักวันล่าสุดมากกว่า ตอบสนองเร็วกว่า SMA</p>
+            <p><strong class="text-highlight">นิยมสูงสุด</strong> ในหมู่นักเทรดไทย</p>
+          </div>
+          <div class="card red">
+            <div class="tag">WMA</div>
+            <h4>Weighted MA</h4>
+            <p>ให้น้ำหนักล่าสุดมากที่สุด ตอบสนองเร็วที่สุด แต่เกิด False Signal บ่อย</p>
+          </div>
+        </div>
+        <ul class="rule-list">
+          <li><div class="num">ใช้ 1</div><div><strong>สัญญาณซื้อขาย</strong> — Golden Cross (MA เร็วตัดขึ้นเหนือ MA ช้า = ซื้อ) · Dead Cross (= ขาย) ใช้ได้ดีในตลาดที่มีเทรน False Signal เยอะในไซด์เวย์</div></li>
+          <li><div class="num">ใช้ 2</div><div><strong>แนวรับ-แนวต้าน</strong> — EMA 200 คือเส้นศักดิ์สิทธิ์แบ่งขาขึ้น/ขาลง EMA 50 ใช้เป็น Trailing Stop ดูพฤติกรรมหุ้นแต่ละตัวว่าชอบพักที่เส้นไหน</div></li>
+        </ul>
+        <a class="back-top" href="#intro">↑ กลับด้านบน</a>
+      </section>
+
+      <!-- ── MACD ────────────────────────── -->
+      <section id="macd" class="section">
+        <div class="section-header">
+          <div class="section-icon icon-red">📉</div>
+          <div><h3>MACD</h3><div class="sub">Moving Average Convergence &amp; Divergence</div></div>
+          <div class="dim-badge badge-ind">INDICATOR</div>
+        </div>
+        <div class="cards">
+          <div class="card red">
+            <div class="tag">สูตร</div>
+            <h4>หลักการ</h4>
+            <p>ความต่างระหว่าง <strong class="text-highlight">EMA 12 − EMA 26</strong></p>
+            <ul class="bullet-list">
+              <li>MACD &gt; 0 = EMA 12 เหนือ EMA 26 → ขาขึ้น</li>
+              <li>MACD &lt; 0 = EMA 26 เหนือ EMA 12 → ขาลง</li>
+              <li>Signal Line = EMA 9 ของ MACD</li>
+            </ul>
+          </div>
+          <div class="card red">
+            <div class="tag">การใช้งาน</div>
+            <h4>วิธีที่ผู้เขียนใช้จริง</h4>
+            <p>ใช้ดูเทรน <strong class="text-highlight">3 TF พร้อมกัน</strong> (เช่น TF 5, 15, 60)</p>
+            <p>ถ้าทั้ง 3 TF MACD เขียว ห้ามขายสวน MACD ยังนับ Elliott Wave ได้ด้วย (อ้างอิง: Trading Chaos)</p>
+          </div>
+        </div>
+        <a class="back-top" href="#intro">↑ กลับด้านบน</a>
+      </section>
+
+      <!-- ── RSI ─────────────────────────── -->
+      <section id="rsi" class="section">
+        <div class="section-header">
+          <div class="section-icon icon-red">💪</div>
+          <div><h3>RSI (Relative Strength Index)</h3><div class="sub">Oscillator — วัดแรงซื้อ vs แรงขาย</div></div>
+          <div class="dim-badge badge-ind">INDICATOR</div>
+        </div>
+        <div class="cards">
+          <div class="card red">
+            <div class="tag">ความหมายที่แท้จริง</div>
+            <h4>OB ≠ ขายทันที</h4>
+            <p>RSI 70 = แรงซื้อชนะแรงขาย <strong class="text-highlight">2:1</strong> — นี่คือจุดที่มวลชนเข้ามาเล่น (<strong>PP / Wave 3</strong>)</p>
+            <p>ไม่ใช่สัญญาณขายทันที ยิ่ง OB ยิ่งบ่งว่าเทรนแข็งแกร่ง</p>
+          </div>
+          <div class="card red">
+            <div class="tag">Divergence</div>
+            <h4>สัญญาณกลับตัว</h4>
+            <p>เมื่อพบ Bullish Divergence (ราคาลง แต่ RSI ขึ้น) — <strong class="text-highlight">อย่ารีบเข้า</strong></p>
+            <p>รอให้ราคาและ RSI เบรกจุด B พร้อมกัน (Convergence) ค่อยซื้อ</p>
+          </div>
+        </div>
+        <div class="tip">
+          <span class="tip-icon">🔍</span>
+          <span><strong>เทคนิค Scan หุ้น:</strong> ค้นหาหุ้นที่มี <strong class="text-teal">RSI Weekly ลอยเหนือ 70</strong> = อนุมานว่าเป็น Wave 3 ใน Weekly Chart → กระแสมวลชนแรงสุด → โอกาสรันกำไรได้ไกล แล้วค่อยจับจังหวะเข้าใน Minor Trend</span>
+        </div>
+        <a class="back-top" href="#intro">↑ กลับด้านบน</a>
+      </section>
+
+      <!-- ── STOCHASTIC ───────────────────── -->
+      <section id="stochastic" class="section">
+        <div class="section-header">
+          <div class="section-icon icon-red">🔄</div>
+          <div><h3>Stochastic Oscillator</h3><div class="sub">Oscillator — วัดการแกว่งตัว</div></div>
+          <div class="dim-badge badge-ind">INDICATOR</div>
+        </div>
+        <div class="cards">
+          <div class="card red">
+            <div class="tag">หลักการ</div>
+            <h4>%K และ %D</h4>
+            <ul class="bullet-list">
+              <li><strong class="text-highlight">%K</strong> = ราคาปิดเทียบกับ High ของช่วง</li>
+              <li><strong class="text-highlight">%D</strong> = ค่าเฉลี่ยของ %K</li>
+              <li>ซื้อ: %K ตัด %D ขึ้น ใน Zone OS (&lt;20)</li>
+              <li>ขาย: %K ตัด %D ลง ใน Zone OB (&gt;80)</li>
+            </ul>
+          </div>
+          <div class="card red">
+            <div class="tag">ข้อดี</div>
+            <h4>ทำไมดีกว่า RSI?</h4>
+            <ul class="bullet-list">
+              <li><strong class="text-highlight">ไวกว่า RSI</strong> — ใช้ 9 วันเป็นหลัก</li>
+              <li>ทำกำไรได้แม้ใน <strong class="text-highlight">ตลาด Sideway</strong></li>
+              <li><strong class="text-highlight">นับรอบได้มากกว่า</strong> RSI (ช่วยหา Stop Loss และ Take Profit)</li>
+              <li>หา Price Pattern ได้ (Sto 5,3,3)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="tip">
+          <span class="tip-icon">🚗</span>
+          <span><strong>เปรียบเหมือนผ่อนคันเร่ง:</strong> เมื่อ Sto ลงสุด (OS) แต่ราคาไม่ค่อยลง — เมื่อ Sto ตัดขึ้น ราคามักวิ่งแรง ใช้ท่านี้สำหรับ "ท่าเก็บสบู่" หรือจับของหลังตกรถใน TFEX</span>
+        </div>
+        <a class="back-top" href="#intro">↑ กลับด้านบน</a>
+      </section>
+
+      <!-- ── KEY TAKEAWAYS ─────────────────── -->
+      <section id="summary" class="section">
+        <div class="section-header">
+          <div class="section-icon icon-teal">⭐</div>
+          <div><h3>Key Takeaways</h3><div class="sub">สิ่งที่ผู้เขียนย้ำตลอดเล่ม</div></div>
+        </div>
+        <ul class="rule-list">
+          <li><div class="num">1</div><div><strong>อ่านเทรนให้ออกก่อน</strong> — Indicator ทุกตัวต้องการเทรนถึงจะทำงานได้ดี ตลาดขาลงไม่มีอะไรช่วยได้</div></li>
+          <li><div class="num">2</div><div><strong>Volume คือพลังงาน</strong> — ราคาขึ้นโดยไม่มีวอลุ่มไม่มีความหมาย รอ "ทั้งราคาและวอลุ่ม New High" จึงจะเชื่อ</div></li>
+          <li><div class="num">3</div><div><strong>อย่ายึดติดรูปแบบ</strong> — Chart Pattern คือจิตวิทยาหมู่ ตลาดไม่ต้องทำตามตำรา Action สำคัญกว่าการนับคลื่นให้ถูก</div></li>
+          <li><div class="num">4</div><div><strong>มองหลาย TF เสมอ</strong> — อย่าดู TF เล็กเกินไปจนมองไม่เห็นภาพใหญ่ Pattern ย่อยอาจอยู่ใน Pattern ใหญ่ที่ตรงข้าม</div></li>
+          <li><div class="num">5</div><div><strong>ควบคุมตัวเองให้ได้</strong> — ความโลภ-กลัวทำลายระบบดีๆ ได้เสมอ Darvas รวยเพราะระบบดีและไม่ขายก่อนถึงเป้า</div></li>
+        </ul>
+        <div class="quote-box mt-lg">
+          "You can either be the ball floating on the waves, or make your own waves."
+          <cite>— คำคมที่ผู้เขียนชอบที่สุด</cite>
+        </div>
+        <a class="back-top" href="#intro">↑ กลับด้านบน</a>
+      </section>
+
+    </div><!-- /content -->
+  </main>
+
+  <footer>
+    <span>Silly Technical — สรุปเนื้อหา · Written by poy</span>
+    <span>Price · Volume · Indicator</span>
+  </footer>
+
+  <!-- ═══════════════════════════════ SCRIPT ══ -->
+  <script>
+    const html      = document.documentElement;
+    const themeIcon = document.getElementById('themeIcon');
+    const themeBtn  = document.getElementById('themeBtn');
+    const mainNav   = document.getElementById('mainNav');
+    const overlay   = document.getElementById('navOverlay');
+
+    /* ── Theme ─────────────────────────────── */
+    function applyTheme(theme) {
+      html.dataset.theme  = theme;
+      const isDark        = theme === 'dark';
+      themeIcon.textContent = isDark ? '☀️' : '🌙';
+      themeBtn.title      = isDark ? 'เปลี่ยนเป็นโหมดสว่าง' : 'เปลี่ยนเป็นโหมดมืด';
+      localStorage.setItem('st-theme', theme);
+    }
+
+    function toggleTheme() {
+      applyTheme(html.dataset.theme === 'dark' ? 'light' : 'dark');
+    }
+
+    /* ── Sidebar (tablet / mobile) ─────────── */
+    function openSidebar() {
+      mainNav.classList.add('nav-open');
+      overlay.classList.add('overlay-visible');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSidebar() {
+      mainNav.classList.remove('nav-open');
+      overlay.classList.remove('overlay-visible');
+      document.body.style.overflow = '';
+    }
+
+    function toggleSidebar() {
+      mainNav.classList.contains('nav-open') ? closeSidebar() : openSidebar();
+    }
+
+    /* ── Init ──────────────────────────────── */
+    document.addEventListener('DOMContentLoaded', function () {
+      /* restore saved theme */
+      var saved = localStorage.getItem('st-theme') || 'dark';
+      applyTheme(saved);
+
+      /* close sidebar on nav-link click (mobile/tablet) */
+      mainNav.querySelectorAll('a').forEach(function (link) {
+        link.addEventListener('click', function () {
+          if (window.innerWidth <= 1024) closeSidebar();
+        });
+      });
+
+      /* ESC to close sidebar */
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeSidebar();
+      });
+    });
+  </script>
+</body>
+</html>
