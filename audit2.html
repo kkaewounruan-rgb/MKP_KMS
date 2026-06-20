@@ -318,6 +318,403 @@ tr.dr.rf{background:var(--fail-bg);}
    1) Deploy ไฟล์ Code.gs เป็น Web App (ดูคำแนะนำในไฟล์ Code.gs)
    2) นำ URL ที่ได้มาแทนที่ค่าด้านล่างนี้
    ════════════════════════════════════════════════════════════════ */
+const SHEET_WEB_APP_URL = "https://script.google.com/macros/s/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX/exec";
+
+const DATA = [
+  {
+    group:"📄 เอกสาร & การตรวจนับ",
+    items:[
+      {
+        n:1,
+        topic:"ความถูกต้องของเอกสารและการสุ่มหน้างาน",
+        cond:"ตรวจใบรายงานตรวจรับเทียบจำนวนมัดจริงหน้างาน รายงานต้องตรงกันเสมอ",
+        method:"หัวหน้างานสุ่ม Genba ตรวจนับมัดจริงบนรถ เทียบตัวเลขที่ Auditor ยืนยันในรายงาน ณ เวลานั้น",
+        scale:"2=ตรงทุกครั้ง\n1=ผิดพลาด 1 ครั้ง\n0=ผิดพลาด ≥2 ครั้ง"
+      }
+    ]
+  },
+  {
+    group:"💧 การวัดความชื้นและการเก็บตัวอย่าง",
+    items:[
+      {
+        n:2,
+        topic:"การควบคุมมาตรฐานการวัดความชื้น",
+        cond:"วัดความชื้นครบตามเกณฑ์ (1 มัด = 3 จุด, รถ <40 มัด = 60 ค่า, รถ >60 มัด = 90 ค่า) และถ่ายรูปหน้าจอเมื่อค่า ≥18%",
+        method:"ตรวจ FM-RM-01 + ข้อมูลเครื่อง AP-500M ว่าจุดวัดครบตามสัดส่วน และสุ่มคลังภาพถ่ายเทียบค่าที่เกิน 18%",
+        scale:"2=ครบทุกจุด+ภาพ\n1=ขาดบางจุด/ภาพ\n0=ไม่ครบ/ไม่มีภาพ"
+      },
+      {
+        n:3,
+        topic:"มาตรฐานการเก็บตัวอย่าง (Sampling Standard)",
+        cond:"เก็บตัวอย่างเศษ 1 ชิ้น ≈60×30 ซม. (กล่องเบียร์ 1 แผ่น) สอดคล้องกับผลตรวจวัด พร้อมพับใส่ถุงซิปลงรายละเอียดครบถ้วน",
+        method:"สุ่มตรวจถุงตัวอย่างที่เตรียมส่ง QA ทุกวัน ตรวจขนาดชิ้น ข้อมูลบนถุง และสภาพความชื้นว่าสอดคล้องกับรายงาน",
+        scale:"2=ครบทุกรายการ\n1=ขาดบางรายการ\n0=ไม่มีตัวอย่าง/ไม่สอดคล้อง"
+      }
+    ]
+  },
+  {
+    group:"🔍 การตรวจสอบทางกายภาพและสิ่งเจือปน",
+    items:[
+      {
+        n:4,
+        topic:"ความเฉียบขาดในการคัดเลือกมัดผ่า",
+        cond:"เลือกมัดผิดปกติ (อัดแน่น อ้วนใหญ่ ชื้นสูง มีสิ่งผิดปกติ) พ่นสีสเปรย์แดงสั่งผ่า จำนวนไม่น้อยกว่าเกณฑ์กำหนด",
+        method:"สังเกตการณ์หน้างานว่า Auditor เดินสำรวจอย่างตั้งใจหรือสุ่มขอไปที + ตรวจบันทึกจำนวนมัดผ่าเทียบขนาดรถ",
+        scale:"2=ครบและตั้งใจ\n1=ผ่าน แต่ไม่ครบเกณฑ์\n0=ไม่สำรวจ/สุ่มผ่า"
+      },
+      {
+        n:5,
+        topic:"ความแม่นยำในการประเมินจับจั๊วและสิ่งเจือปน",
+        cond:"เมื่อพบจับจั๊ว >0.5 มัด ต้องแบ่งสัดส่วนด้วยสายตา (1 มัด = 4 ส่วน) และคำนวณตัดเปอร์เซ็นต์ตามสูตรถูกต้อง",
+        method:"หัวหน้าแผนก Cross-check กับ Auditor ในรถที่มีแนวโน้มพบจับจั๊ว เทียบสายตาสัดส่วนและทิศทางการตัดสินใจ",
+        scale:"2=แม่นยำและตรงกัน\n1=แตกต่างเล็กน้อย\n0=ผิดพลาดมาก/ไม่คำนวณ"
+      }
+    ]
+  },
+  {
+    group:"📸 การถ่ายภาพและหลักฐาน",
+    items:[
+      {
+        n:6,
+        topic:"การถ่ายภาพเพื่อจัดเก็บเป็นหลักฐาน",
+        cond:"ถ่ายรูปมัดผ่าอย่างน้อย 3 ภาพ หากพบจับจั๊ว/สิ่งเจือปน ถ่ายเพิ่มเป็น 5 ภาพขึ้นไป โดยปรับจำนวนภาพตามปริมาณมากน้อยของจับจั๊ว/สิ่งเจือปนที่พบ รวมภาพคนขับรับทราบการตัดเปอร์เซ็นต์",
+        method:"ตรวจ Digital Audit โฟลเดอร์ภาพประจำวัน นับจำนวนรูปต่อคัน เทียบกับปริมาณจับจั๊ว/สิ่งเจือปนที่พบจริงหน้างาน และตรวจมุมกล้องว่าใช้เป็นหลักฐานได้",
+        scale:"2=ครบตามจำนวนที่กำหนด\n1=ภาพไม่ครบ/ไม่สอดคล้องปริมาณที่พบ\n0=ไม่มีภาพ/ใช้เป็นหลักฐานไม่ได้"
+      }
+    ]
+  },
+  {
+    group:"🛡️ ความปลอดภัย & การสื่อสาร",
+    items:[
+      {
+        n:7,
+        topic:"การปฏิบัติงานอย่างปลอดภัยของ Auditor และการควบคุมความปลอดภัยหน้างาน",
+        cond:"Auditor ปฏิบัติงานด้วยความปลอดภัย (สวมอุปกรณ์ป้องกัน ไม่อยู่ในตำแหน่งเสี่ยงขณะรถเข้า-ออก/ขณะผ่ามัด) และออกคำสั่งตักเตือนเจ้าหน้าที่ที่ปฏิบัติงานเสี่ยงต่อการเกิดอุบัติเหตุทุกครั้ง",
+        method:"สังเกตพฤติกรรมความปลอดภัยของ Auditor เองหน้างาน + สัมภาษณ์เจ้าหน้าที่ในทีม หรือตรวจบันทึกการตักเตือน/รายงานความปลอดภัยว่า Auditor ทำหน้าที่คุมกฎจริงหรือไม่",
+        scale:"2=ปลอดภัยและตักเตือนครบทุกครั้ง\n1=พลาดบางกรณี (ตนเอง/การตักเตือน)\n0=ทำงานเสี่ยงเอง/ไม่ตักเตือนเลย"
+      },
+      {
+        n:8,
+        topic:"การจัดการข้อขัดแย้งและการชี้แจงผู้ขับรถ",
+        cond:"หากมีการตัดความชื้น/จับจั๊ว/สิ่งเจือปน ต้องแจ้งคนขับมาดูสภาพกระดาษและถ่ายรูปเป็นหลักฐานเสมอ",
+        method:"ตรวจจากการร้องเรียนของ Supplier หรือการโต้แย้งภายหลัง หากโต้แย้งสูงและหลักฐานไม่ชัดเจน = Auditor บกพร่อง",
+        scale:"2=ไม่มีข้อโต้แย้ง/มีหลักฐานครบ\n1=มีข้อโต้แย้งแต่มีหลักฐาน\n0=โต้แย้ง+ไม่มีหลักฐาน"
+      }
+    ]
+  },
+  {
+    group:"⏰ การรักษาเวลาในการปฏิบัติหน้าที่",
+    items:[
+      {
+        n:9,
+        topic:"การรักษาเวลาและความต่อเนื่องในการปฏิบัติหน้าที่",
+        cond:"ติดตามหน้างานอย่างต่อเนื่องตลอดช่วงเวลาปฏิบัติงาน ไม่ละทิ้งหน้าที่ (Stand-by ประจำหน้างานตามรอบเวลาที่กำหนด)",
+        method:"สุ่มตรวจ ณ หน้างานในช่วงเวลาทำงาน ว่า Auditor อยู่ปฏิบัติหน้าที่ต่อเนื่องหรือไม่ และตรวจสอบช่วงเวลาที่ไม่มีการบันทึกผล/ไม่มี Auditor ประจำหน้างาน",
+        scale:"2=ติดตามต่อเนื่อง ไม่ละทิ้งหน้าที่\n1=ละทิ้งหน้าที่เป็นบางช่วง\n0=ละทิ้งหน้าที่บ่อย/ไม่อยู่ปฏิบัติงาน"
+      }
+    ]
+  },
+  {
+    group:"✅ การรับรองรายงานประจำวัน",
+    items:[
+      {
+        n:10,
+        topic:"ความสมบูรณ์ของการรับรองรายงานประจำวัน",
+        cond:"ตรวจสอบความถูกต้องของรายงานการตรวจเศษประจำวันทั้งหมด และเซ็นรับรองความถูกต้องก่อนส่งต่อทุกวัน",
+        method:"ตรวจหาความผิดพลาดในการลงข้อมูล การคำนวณที่ผิดพลาด หรือการลืมเซ็นชื่อรับรองในเอกสารก่อนจบวัน",
+        scale:"2=ไม่มีข้อผิดพลาด\n1=ผิดพลาดเล็กน้อย\n0=ลืมเซ็น/คำนวณผิด"
+      }
+    ]
+  }
+];
+
+const scores={}, remarks={};
+
+function lbl(s){
+  if(s===2) return {t:"ดีเยี่ยม",c:"pas.meta-ttl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:10px;}
+.meta-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 24px;}
+.mf{display:flex;flex-direction:column;gap:2px;}
+.ml{font-size:10px;color:var(--gray-400);text-transform:uppercase;letter-spacing:1px;}
+.mi{border:none;border-bottom:1.5px solid var(--gray-200);padding:4px 0;
+    font-family:'Sarabun',sans-serif;font-size:13px;font-weight:600;
+    color:var(--text);background:transparent;outline:none;width:100%;}
+.mi:focus{border-bottom-color:var(--teal);}
+
+/* ── BANNER ── */
+.banner{background:#fff;border-bottom:1px solid var(--gray-200);padding:11px 26px;
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+.bpill{display:flex;align-items:center;gap:8px;background:var(--gray-100);
+  border-radius:20px;padding:6px 16px;}
+.bpill .bv{font-size:20px;font-weight:800;}
+.bpill .bl{font-size:10.5px;color:var(--gray-400);line-height:1.3;}
+.bprog{flex:1;min-width:140px;}
+.bpl{font-size:10px;color:var(--gray-400);margin-bottom:4px;letter-spacing:1px;text-transform:uppercase;}
+.bbar{height:8px;background:var(--gray-200);border-radius:4px;overflow:hidden;}
+.bfill{height:100%;border-radius:4px;transition:width .4s,background .4s;background:var(--teal);}
+.vchip{padding:6px 18px;border-radius:20px;font-weight:700;font-size:12px;
+  background:var(--gray-200);color:var(--gray-400);transition:all .3s;white-space:nowrap;}
+.vchip.pass{background:var(--pass-bg);color:var(--pass);}
+.vchip.warn{background:var(--part-bg);color:var(--part);}
+.vchip.fail{background:var(--fail-bg);color:var(--fail);}
+
+/* ── TABLE ── */
+.tw{padding:18px 26px 6px;overflow-x:auto;}
+table.cs{width:100%;border-collapse:collapse;background:#fff;
+  border-radius:12px;overflow:hidden;
+  box-shadow:0 1px 5px rgba(0,0,0,.09);}
+table.cs thead tr{background:var(--navy);color:#fff;}
+table.cs thead th{padding:10px 12px;font-size:10.5px;font-weight:700;
+  letter-spacing:.8px;text-transform:uppercase;text-align:center;white-space:nowrap;}
+table.cs thead th.left{text-align:left;}
+
+/* group */
+tr.grp td{background:var(--teal);color:#fff;padding:7px 14px;
+  font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+
+/* data */
+tr.dr{border-bottom:1px solid var(--gray-200);transition:background .15s;}
+tr.dr:hover{background:var(--gray-50);}
+tr.dr.rp{background:var(--pass-bg);}
+tr.dr.rw{background:var(--part-bg);}
+tr.dr.rf{background:var(--fail-bg);}
+
+.tn{width:38px;text-align:center;padding:12px 6px;
+  font-weight:800;font-size:13px;color:#fff;background:var(--navy);}
+.tt{padding:11px 13px;min-width:165px;}
+.ttn{font-weight:700;font-size:13px;margin-bottom:3px;}
+.ttc{font-size:11px;color:#546E7A;line-height:1.45;margin-top:2px;}
+.tm{padding:10px 12px;min-width:195px;font-size:11px;color:#455A64;line-height:1.5;}
+.ts{text-align:center;padding:10px 8px;min-width:68px;font-size:10.5px;
+  color:#607D8B;line-height:1.5;}
+.tc{text-align:center;padding:10px 6px;min-width:88px;}
+
+/* score buttons */
+.sg{display:flex;flex-direction:column;gap:4px;align-items:center;}
+.sb{width:68px;padding:4px 0;border-radius:5px;border:1.5px solid transparent;
+  font-family:'Sarabun',sans-serif;font-size:11px;font-weight:700;
+  cursor:pointer;transition:all .15s;background:#fff;text-align:center;}
+.sb.s2{border-color:var(--pass);color:var(--pass);}
+.sb.s2:hover,.sb.s2.on{background:var(--pass);color:#fff;}
+.sb.s1{border-color:var(--part);color:var(--part);}
+.sb.s1:hover,.sb.s1.on{background:var(--part);color:#fff;}
+.sb.s0{border-color:var(--fail);color:var(--fail);}
+.sb.s0:hover,.sb.s0.on{background:var(--fail);color:#fff;}
+
+.tr2{padding:10px 8px;min-width:155px;}
+.ri{width:100%;border:1.5px solid var(--gray-200);border-radius:6px;
+  padding:5px 8px;font-family:'Sarabun',sans-serif;font-size:12px;
+  background:var(--gray-50);outline:none;resize:none;height:52px;}
+.ri:focus{border-color:var(--teal);background:#fff;}
+
+.trs{text-align:center;padding:10px 6px;min-width:68px;}
+.rb{display:inline-block;padding:4px 10px;border-radius:20px;
+  font-size:11px;font-weight:700;min-width:54px;}
+.rb.pass{background:var(--pass-bg);color:var(--pass);}
+.rb.part{background:var(--part-bg);color:var(--part);}
+.rb.fail{background:var(--fail-bg);color:var(--fail);}
+.rb.pend{background:var(--gray-200);color:var(--gray-400);}
+
+/* ── SUMMARY ── */
+.sum{padding:14px 26px 32px;display:none;}
+.sttl{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--teal);margin-bottom:12px;}
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+.sc{background:#fff;border-radius:10px;border:1.5px solid var(--gray-200);padding:14px;text-align:center;}
+.sc .sv{font-size:26px;font-weight:800;line-height:1;margin-bottom:3px;}
+.sc .sl{font-size:10px;color:var(--gray-400);text-transform:uppercase;letter-spacing:1px;}
+.sc.cp .sv{color:var(--pass);}
+.sc.cw .sv{color:var(--part);}
+.sc.cf .sv{color:var(--fail);}
+.sc.cs .sv{color:var(--teal);}
+
+.vbox{background:#fff;border-radius:10px;padding:16px 22px;
+  border-left:5px solid var(--gray-200);margin-bottom:14px;
+  display:flex;align-items:center;gap:14px;}
+.vbox.vp{border-color:var(--pass);background:var(--pass-bg);}
+.vbox.vw{border-color:var(--part);background:var(--part-bg);}
+.vbox.vf{border-color:var(--fail);background:var(--fail-bg);}
+.vi{font-size:28px;}
+.vt2{font-size:15px;font-weight:700;}
+.vs2{font-size:11.5px;margin-top:3px;color:#546E7A;}
+
+.ftable{width:100%;border-collapse:collapse;background:#fff;
+  border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.07);}
+.ftable th{background:var(--fail);color:#fff;padding:8px 12px;font-size:11px;text-align:left;}
+.ftable td{padding:8px 12px;border-bottom:1px solid var(--gray-200);font-size:12px;}
+.ftable tr:last-child td{border:none;}
+.ftable tr:hover td{background:var(--fail-bg);}
+
+/* ── ACTION BAR ── */
+.abar{position:sticky;bottom:0;background:#fff;border-top:2.5px solid var(--teal);
+  padding:11px 26px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  box-shadow:0 -2px 12px rgba(0,0,0,.09);z-index:100;}
+.btn{padding:9px 22px;border-radius:8px;border:none;
+  font-family:'Sarabun',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-p{background:var(--teal);color:#fff;} .btn-p:hover{background:var(--navy);}
+.btn-s{background:var(--gray-200);color:var(--text);} .btn-s:hover{background:var(--gray-400);color:#fff;}
+.btn-d{background:transparent;border:1.5px solid var(--fail);color:var(--fail);}
+.btn-d:hover{background:var(--fail);color:#fff;}
+.btn:disabled{opacity:.6;cursor:not-allowed;}
+.anote{margin-left:auto;font-size:11px;color:var(--gray-400);}
+
+/* ── Cloud status banner ── */
+.cloud-note{background:#FFF8E1;border-bottom:1px solid #F2D98A;padding:8px 26px;
+  font-size:11.5px;color:#7A5B00;display:flex;align-items:center;gap:8px;}
+.cloud-note.ok{display:none;}
+
+/* ── RESPONSIVE DESIGN (Desktop / iPad / Mobile) ── */
+
+/* iPad / Tablet Mode (768px - 1024px) */
+@media (max-width: 1024px) {
+  .meta-grid { grid-template-columns: 1fr 1fr; }
+  .sgrid { grid-template-columns: 1fr 1fr; }
+  .ph-body, .banner, .meta, .tw, .sum, .abar, .cloud-note { padding-left: 16px; padding-right: 16px; }
+  .ph-icon { padding: 18px 16px; }
+}
+
+/* Mobile Mode (max-width: 767px) */
+@media (max-width: 767px) {
+  .meta-grid { grid-template-columns: 1fr; gap: 12px; }
+  .sgrid { grid-template-columns: 1fr; }
+
+  .banner { flex-direction: column; align-items: stretch; gap: 12px; }
+  .bpill { justify-content: space-between; }
+  .bprog { margin-top: 4px; }
+  .vchip { text-align: center; }
+
+  .ph-h1 { font-size: 16px; }
+  .ph-sub { line-height: 1.4; }
+  .icon-box { width: 42px; height: 42px; font-size: 20px; }
+
+  /* ปรับปุ่มในตารางให้เรียงแนวนอนบนมือถือ */
+  .sg { flex-direction: row; justify-content: center; flex-wrap: wrap; gap: 6px; }
+  .sb { width: auto; flex: 1; min-width: 50px; }
+
+  .abar { justify-content: center; padding-bottom: 16px; }
+  .btn { flex: 1 1 auto; text-align: center; }
+  .anote { text-align: center; width: 100%; margin-top: 8px; margin-left: 0; }
+
+  .vbox { flex-direction: column; text-align: center; gap: 8px; }
+}
+
+/* ── PRINT STYLES ── */
+@media print{
+  .abar, .ph-icon, .cloud-note {display:none;}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  .tw { padding: 0; overflow-x: visible; }
+  .ri{
+      border:1px solid #ccc;
+      height:auto !important;
+      min-height:52px;
+      overflow:visible;
+      word-wrap:break-word;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ⚠️ ถ้ายังไม่ตั้งค่า Web App URL ของ Google Apps Script จะมีข้อความเตือนแถบนี้ขึ้นมา -->
+<div class="cloud-note" id="cloud-note">
+  ⚠️ ยังไม่ได้เชื่อมต่อ Google Sheets — แก้ค่า <code>SHEET_WEB_APP_URL</code> ในโค้ด (ดูวิธีตั้งค่าในไฟล์ Code.gs)
+</div>
+
+<!-- ครอบทุกส่วนที่ต้องการ "พิมพ์ออกเป็น PDF" ไว้ใน captureArea (ไม่รวม action bar) -->
+<div id="captureArea">
+
+<div class="ph">
+  <div class="ph-stripe"></div>
+  <div class="ph-body">
+    <div class="ph-tag">Auditor Performance — Scrap Receiving</div>
+    <div class="ph-h1">Check Sheet ประเมินประสิทธิภาพ Auditor<br>
+      <span style="font-weight:400;font-size:15px">การตรวจรับเศษ / วัตถุดิบ ปี 2569</span></div>
+    <div class="ph-sub">แบบฟอร์ม FM-AUDIT-01 &nbsp;|&nbsp; 10 หัวข้อประเมิน &nbsp;|&nbsp; คะแนนเต็ม 20 คะแนน</div>
+  </div>
+  <div class="ph-icon"><div class="icon-box">📋</div></div>
+</div>
+
+<div class="meta">
+  <div class="meta-ttl">ข้อมูลการประเมิน</div>
+  <div class="meta-grid">
+    <div class="mf"><span class="ml">ชื่อ Auditor ที่ถูกประเมิน</span><input class="mi" type="text" placeholder="ชื่อ-นามสกุล" id="f-name"></div>
+    <div class="mf"><span class="ml">ตำแหน่ง / แผนก</span><input class="mi" type="text" placeholder="เช่น QC / รับเศษ" id="f-dept"></div>
+    <div class="mf"><span class="ml">วันที่ประเมิน</span><input class="mi" type="date" id="f-date"></div>
+    <div class="mf"><span class="ml">ผู้ประเมิน (Evaluator)</span><input class="mi" type="text" placeholder="ชื่อผู้ประเมิน" id="f-eval"></div>
+    <div class="mf"><span class="ml">รอบ / ครั้งที่</span><input class="mi" type="text" placeholder="เช่น Q1 / ครั้งที่ 1" id="f-round"></div>
+    <div class="mf"><span class="ml">วิธีประเมินหลัก</span><input class="mi" type="text" placeholder="เช่น Genba + Record Review" id="f-mth"></div>
+  </div>
+</div>
+
+<div class="banner">
+  <div class="bpill">
+    <span class="bv" id="b-score" style="color:var(--teal)">0</span>
+    <span class="bl">คะแนนรวม<br>/ 20 คะแนน</span>
+  </div>
+  <div class="bpill">
+    <span class="bv" id="b-pct" style="color:var(--navy)">0%</span>
+    <span class="bl">เปอร์เซ็นต์<br>คะแนน</span>
+  </div>
+  <div class="bprog">
+    <div class="bpl">ความคืบหน้า (<span id="b-done">0</span>/10 หัวข้อ)</div>
+    <div class="bbar"><div class="bfill" id="b-bar" style="width:0%"></div></div>
+  </div>
+  <div class="vchip" id="b-verdict">รอการประเมิน</div>
+</div>
+
+<div class="tw">
+<table class="cs">
+<thead>
+  <tr>
+    <th style="width:38px">#</th>
+    <th class="left" style="min-width:170px">หัวข้อ / เงื่อนไข</th>
+    <th class="left" style="min-width:195px">วิธีการประเมิน</th>
+    <th style="min-width:100px">เกณฑ์คะแนน</th>
+    <th style="width:88px">คะแนน</th>
+    <th style="min-width:155px">หมายเหตุ / หลักฐาน</th>
+    <th style="width:70px">ผล</th>
+  </tr>
+</thead>
+<tbody id="tb"></tbody>
+</table>
+</div>
+
+<div class="sum" id="sum">
+  <div class="sttl">📊 สรุปผลการประเมิน</div>
+  <div class="sgrid">
+    <div class="sc cs"><div class="sv" id="s-tot">0/20</div><div class="sl">คะแนนรวม</div></div>
+    <div class="sc cs"><div class="sv" id="s-pct">0%</div><div class="sl">% คะแนน</div></div>
+    <div class="sc cp"><div class="sv" id="s-p">0</div><div class="sl">หัวข้อ ดีเยี่ยม</div></div>
+    <div class="sc cf"><div class="sv" id="s-f">0</div><div class="sl">หัวข้อ ไม่ผ่าน</div></div>
+  </div>
+  <div class="vbox" id="s-vbox">
+    <div class="vi" id="s-vi">⏳</div>
+    <div><div class="vt2" id="s-vt">รอการประเมิน</div><div class="vs2" id="s-vs">กรุณาประเมินให้ครบทุกหัวข้อ</div></div>
+  </div>
+  <div id="s-ftable"></div>
+</div>
+
+</div><!-- /captureArea -->
+
+<div class="abar">
+  <button class="btn btn-p" onclick="showSum()">📊 สรุปผล</button>
+  <button class="btn btn-p" id="btn-save" onclick="saveToSheet()">☁️ บันทึกลง Sheets</button>
+  <button class="btn btn-s" id="btn-pdf" onclick="downloadPDF()">📄 ดาวน์โหลด PDF</button>
+  <button class="btn btn-s" id="btn-doc" onclick="downloadDoc()">📝 ดาวน์โหลด Word</button>
+  <button class="btn btn-s" onclick="window.print()">🖨️ พิมพ์</button>
+  <button class="btn btn-d" onclick="resetAll()">↺ รีเซ็ต</button>
+  <span class="anote">คะแนน : 2 = ดีเยี่ยม &nbsp;/&nbsp; 1 = พอใช้ &nbsp;/&nbsp; 0 = ไม่ผ่าน &nbsp;|&nbsp; เต็ม 20 คะแนน</span>
+</div>
+
+<!-- Libraries for client-side PDF export (no backend needed) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   ⚙️ ตั้งค่าการเชื่อมต่อ Google Sheets
+   1) Deploy ไฟล์ Code.gs เป็น Web App (ดูคำแนะนำในไฟล์ Code.gs)
+   2) นำ URL ที่ได้มาแทนที่ค่าด้านล่างนี้
+   ════════════════════════════════════════════════════════════════ */
 const SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzTCzqifuB0KTXgR4x-6UYlioc0SBG5tgX8Q6-cM-bsbdwQ9UiFAGMNvrCtO8Vlvl_Mog/exec";
 
 const DATA = [
