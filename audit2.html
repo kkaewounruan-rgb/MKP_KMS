@@ -29,7 +29,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--gray-100);color:var(--tex
 .ph-tag{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:5px;}
 .ph-h1{font-size:19px;font-weight:800;line-height:1.25;margin-bottom:2px;}
 .ph-sub{font-size:11.5px;color:rgba(255,255,255,.5);}
-.ph-right{padding:18px 26px;display:flex;align-items:center;gap:16px;border-left:1px solid rgba(255,255,255,.1);}
+.ph-right{padding:18px 26px;display:flex;align-items:center;gap:12px;border-left:1px solid rgba(255,255,255,.1);}
 .icon-box{width:52px;height:52px;background:var(--teal);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
 .btn-link{text-decoration:none;background:rgba(255,255,255,0.1);color:#fff;padding:8px 16px;border-radius:8px;font-weight:700;font-size:12px;border:1px solid rgba(255,255,255,0.2);transition:all 0.2s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
 .btn-link:hover{background:var(--teal);border-color:var(--teal);}
@@ -168,40 +168,30 @@ tr.dr.rf{background:var(--fail-bg);}
 .cloud-note.ok{display:none;}
 
 /* ── RESPONSIVE DESIGN (Desktop / iPad / Mobile) ── */
-
-/* iPad / Tablet Mode (768px - 1024px) */
 @media (max-width: 1024px) {
   .meta-grid { grid-template-columns: 1fr 1fr; }
   .sgrid { grid-template-columns: 1fr 1fr; }
   .ph-body, .banner, .meta, .tw, .sum, .abar, .cloud-note { padding-left: 16px; padding-right: 16px; }
-  .ph-right { padding: 18px 16px; gap: 10px; }
+  .ph-right { padding: 18px 16px; gap: 10px; flex-wrap: wrap; justify-content: center; }
 }
 
-/* Mobile Mode (max-width: 767px) */
 @media (max-width: 767px) {
   .meta-grid { grid-template-columns: 1fr; gap: 12px; }
   .sgrid { grid-template-columns: 1fr; }
-
   .banner { flex-direction: column; align-items: stretch; gap: 12px; }
   .bpill { justify-content: space-between; }
   .bprog { margin-top: 4px; }
   .vchip { text-align: center; }
-
   .ph-h1 { font-size: 16px; }
   .ph-sub { line-height: 1.4; }
-  
-  .ph-right { padding: 10px 16px; flex-direction: column-reverse; justify-content: center; gap: 8px; }
-  .btn-link { padding: 5px 10px; font-size: 10.5px; }
-  .icon-box { width: 42px; height: 42px; font-size: 20px; }
-
-  /* ปรับปุ่มในตารางให้เรียงแนวนอนบนมือถือ */
+  .ph-right { padding: 10px 16px; flex-direction: row; justify-content: center; gap: 8px; flex-wrap: wrap; }
+  .btn-link { padding: 6px 12px; font-size: 11px; flex: 1; text-align: center; justify-content: center; }
+  .icon-box { display: none; }
   .sg { flex-direction: row; justify-content: center; flex-wrap: wrap; gap: 6px; }
   .sb { width: auto; flex: 1; min-width: 50px; }
-
   .abar { justify-content: center; padding-bottom: 16px; }
   .btn { flex: 1 1 auto; text-align: center; }
   .anote { text-align: center; width: 100%; margin-top: 8px; margin-left: 0; }
-
   .vbox { flex-direction: column; text-align: center; gap: 8px; }
 }
 
@@ -237,7 +227,8 @@ tr.dr.rf{background:var(--fail-bg);}
     <div class="ph-sub">แบบฟอร์ม FM-AUDIT-01 &nbsp;|&nbsp; 10 หัวข้อประเมิน &nbsp;|&nbsp; คะแนนเต็ม 20 คะแนน</div>
   </div>
   <div class="ph-right">
-    <a href="db_rm.html" class="btn-link" target="_blank">📊 ดู Dashboard</a>
+    <a href="db_rm.html" class="btn-link" target="_blank">📊 Dashboard</a>
+    <a href="history.html" class="btn-link" target="_blank">📂 History</a>
     <div class="icon-box">📋</div>
   </div>
 </div>
@@ -316,11 +307,6 @@ tr.dr.rf{background:var(--fail-bg);}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-/* ════════════════════════════════════════════════════════════════
-   ⚙️ ตั้งค่าการเชื่อมต่อ Google Sheets
-   1) Deploy ไฟล์ Code.gs เป็น Web App (ดูคำแนะนำในไฟล์ Code.gs)
-   2) นำ URL ที่ได้มาแทนที่ค่าด้านล่างนี้
-   ════════════════════════════════════════════════════════════════ */
 const SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx14gNHhWOf9SZKs0mExkjXRqRDxViDy682Z47LHA29ODWWAN2r3G0Rynbo9IHxh-cuww/exec";
 
 const DATA = [
@@ -566,9 +552,6 @@ function resetAll(){
   render();
 }
 
-/* ════════════════════════════════════════════════════════════════
-   ☁️ บันทึกข้อมูลลง Google Sheets ผ่าน Apps Script Web App
-   ════════════════════════════════════════════════════════════════ */
 async function saveToSheet(){
   if(SHEET_WEB_APP_URL.includes('XXXXXXXX')){
     alert('กรุณาตั้งค่า SHEET_WEB_APP_URL ในโค้ดก่อนใช้งาน — ดูวิธี Deploy ในไฟล์ Code.gs');
@@ -600,8 +583,6 @@ async function saveToSheet(){
   btn.textContent = '⏳ กำลังบันทึก...';
 
   try{
-    // ใช้ mode:'no-cors' + Content-Type:text/plain เพื่อเลี่ยงปัญหา CORS preflight ของ Apps Script
-    // (จะไม่สามารถอ่านผลลัพธ์กลับมาตรวจสอบได้ — ให้ตรวจสอบที่ Google Sheets โดยตรง)
     await fetch(SHEET_WEB_APP_URL, {
       method: 'POST',
       mode: 'no-cors',
@@ -618,9 +599,6 @@ async function saveToSheet(){
   setTimeout(()=>{ btn.textContent = original; btn.disabled = false; }, 2500);
 }
 
-/* ════════════════════════════════════════════════════════════════
-   📄 ดาวน์โหลด PDF (จับภาพหน้าจอด้วย html2canvas แล้วต่อเป็น PDF หลายหน้า)
-   ════════════════════════════════════════════════════════════════ */
 async function downloadPDF(){
   const btn = document.getElementById('btn-pdf');
   const original = btn.textContent;
@@ -662,9 +640,6 @@ async function downloadPDF(){
   }
 }
 
-/* ════════════════════════════════════════════════════════════════
-   📝 ดาวน์โหลด Word (.doc) — ใช้ HTML + mimetype application/msword
-   ════════════════════════════════════════════════════════════════ */
 function buildReportHTML(){
   const {total, pct} = calcStats();
   const verdict = verdictText(pct);
@@ -726,7 +701,6 @@ function downloadDoc(){
   URL.revokeObjectURL(url);
 }
 
-/* ── init ── */
 document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
 if(!SHEET_WEB_APP_URL.includes('XXXXXXXX')){
   document.getElementById('cloud-note').classList.add('ok');
