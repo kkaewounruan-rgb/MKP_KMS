@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enterprise Command Center — Evaluation History</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+/* ════════════════════════════════════════════════════════
+   THEME & BASE VARIABLES
+   ════════════════════════════════════════════════════════ */
+:root {
+  --navy:    #162840;
+  --teal:    #0A7E72;
+  --teal2:   #0D9E90;
+  --accent:  #E8961A;
+  --pass:    #2E7D32; --pass-bg: #E8F5E9;
+  --part:    #BF6000; --part-bg: #FFF3E0;
+  --fail:    #B71C1C; --fail-bg: #FFEBEE;
+  --gray-50: #F9FAFB; --gray-100: #F2F4F6;
+  --gray-200:#E0E4E8; --gray-300:#Cdd4d9; --gray-400: #90A4AE;
+  --text:    #162840;
+  --card-shadow: 0 2px 10px rgba(22,40,64,.09);
+  --hover-shadow: 0 4px 15px rgba(22,40,64,.15);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Sarabun',sans-serif;background:var(--gray-100);color:var(--text);font-size:13px;min-height:100vh;overflow-x:hidden;}
+
+/* ════════════════════════════════════════════════════════
+   LOADING OVERLAY & PERFORMANCE
+   ════════════════════════════════════════════════════════ */
+#loading-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(255,255,255,0.85); z-index: 9999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px); transition: opacity 0.3s;
+}
+.spinner {
+  width: 50px; height: 50px; border: 4px solid var(--gray-200);
+  border-top-color: var(--teal); border-radius: 50%;
+  animation: spin 1s linear infinite; margin-bottom: 16px;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.skeleton { background: #eee; background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%); border-radius: 5px; background-size: 200% 100%; animation: 1.5s shine linear infinite; }
+@keyframes shine { to { background-position-x: -200%; } }
+
+/* ════════════════════════════════════════════════════════
+   HEADER
+   ════════════════════════════════════════════════════════ */
+.ph{display:flex;align-items:stretch;background:var(--navy);}
+.ph-stripe{width:7px;background:var(--accent);flex-shrink:0;}
+.ph-body{padding:16px 26px;flex:1;color:#fff;}
+.ph-tag{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:4px;}
+.ph-h1{font-size:20px;font-weight:800;line-height:1.2;margin-bottom:2px;}
+.ph-sub{font-size:11.5px;color:rgba(255,255,255,.5);}
+.ph-right{display:flex;align-items:center;gap:12px;padding:16px 24px;border-left:1px solid rgba(255,255,255,.1);}
+.icon-box{width:50px;height:50px;background:var(--teal);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.nav-links{display:flex;flex-direction:column;gap:4px;}
+.nav-link{font-size:11px;color:rgba(255,255,255,.6);text-decoration:none;padding:3px 10px;border-radius:5px;transition:all .2s;white-space:nowrap;border:1px solid transparent;}
+.nav-link:hover{color:#fff;border-color:rgba(255,255,255,.3);}
+.nav-link.active{background:var(--teal);color:#fff;}
+
+/* ════════════════════════════════════════════════════════
+   TOOLBAR & SMART FILTERS
+   ════════════════════════════════════════════════════════ */
+.toolbar{background:#fff;border-bottom:2.5px solid var(--teal);padding:12px 26px;display:flex;flex-direction:column;gap:12px;box-shadow: 0 4px 10px rgba(0,0,0,0.03);position:sticky;top:0;z-index:100;}
+.toolbar-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+.toolbar-filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--gray-50);padding:12px;border-radius:8px;border:1px solid var(--gray-200);}
+.filter-group{display:flex;align-items:center;gap:6px;}
+.fl{font-size:10px;color:var(--gray-400);text-transform:uppercase;letter-spacing:1px;white-space:nowrap;}
+.fsel, .finp{border:1.5px solid var(--gray-200);border-radius:6px;padding:6px 10px;font-family:'Sarabun',sans-serif;font-size:12px;font-weight:600;color:var(--text);background:#fff;outline:none;cursor:pointer;transition:all 0.2s;}
+.fsel:focus, .finp:focus, .fsel:hover, .finp:hover{border-color:var(--teal);box-shadow:0 0 0 2px rgba(10,126,114,0.1);}
+.fsel{max-width:140px;}
+.finp[type="text"]{min-width: 200px;}
+
+.toolbar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.btn-action{padding:7px 14px;border-radius:6px;border:none;font-family:'Sarabun',sans-serif;font-size:11.5px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:#c97a0e;transform:translateY(-1px);box-shadow:0 2px 5px rgba(232,150,26,0.3);}
+.btn-secondary{background:var(--gray-200);color:var(--text);}
+.btn-secondary:hover{background:var(--gray-400);color:#fff;}
+.btn-outline{background:transparent;border:1.5px solid var(--teal);color:var(--teal);}
+.btn-outline:hover{background:var(--teal);color:#fff;}
+.btn-danger{background:transparent;border:1.5px solid var(--fail);color:var(--fail);}
+.btn-danger:hover{background:var(--fail);color:#fff;}
+
+/* ════════════════════════════════════════════════════════
+   EXECUTIVE SUMMARY
+   ════════════════════════════════════════════════════════ */
+.exec-summary{background: linear-gradient(135deg, var(--navy) 0%, #1c3350 100%);color:#fff;border-radius:12px;padding:20px 24px;margin-bottom:20px;box-shadow:var(--card-shadow);display:flex;align-items:center;gap:20px;position:relative;overflow:hidden;}
+.exec-summary::after{content:'';position:absolute;top:-50%;right:-10%;width:300px;height:300px;background:radial-gradient(circle, rgba(10,126,114,0.3) 0%, rgba(0,0,0,0) 70%);border-radius:50%;}
+.exec-icon{font-size:36px;background:rgba(255,255,255,0.1);width:64px;height:64px;display:flex;align-items:center;justify-content:center;border-radius:16px;flex-shrink:0;}
+.exec-content{position:relative;z-index:1;}
+.exec-content h2{font-size:14px;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+.exec-content p{font-size:15px;line-height:1.6;font-weight:300;}
+.exec-content strong{font-weight:700;color:#fff;}
+
+/* ════════════════════════════════════════════════════════
+   MAIN CONTENT & KPI GRID
+   ════════════════════════════════════════════════════════ */
+.content{padding:20px 24px 40px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:20px;}
+.kcard{background:#fff;border-radius:12px;padding:18px 20px;box-shadow:var(--card-shadow);display:flex;align-items:center;gap:14px;position:relative;overflow:hidden;transition:transform 0.2s;}
+.kcard:hover{transform:translateY(-2px);box-shadow:var(--hover-shadow);}
+.kcard::after{content:'';position:absolute;bottom:0;left:0;right:0;height:4px;}
+.kcard.kc-teal::after{background:var(--teal);}
+.kcard.kc-navy::after{background:var(--navy);}
+.kcard.kc-pass::after{background:var(--pass);}
+.kcard.kc-part::after{background:var(--part);}
+.kcard.kc-fail::after{background:var(--fail);}
+.kcard.kc-accent::after{background:var(--accent);}
+.kicon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.kc-teal .kicon{background:#E0F2F1;color:var(--teal);}
+.kc-navy .kicon{background:#E8EDF3;}
+.kc-pass .kicon{background:var(--pass-bg);}
+.kc-part .kicon{background:var(--part-bg);}
+.kc-fail .kicon{background:var(--fail-bg);}
+.kc-accent .kicon{background:#FFF3E0;color:var(--accent);}
+.kinfo{flex:1;min-width:0;}
+.kval{font-size:24px;font-weight:800;line-height:1;margin-bottom:4px;}
+.kc-teal .kval{color:var(--teal);}
+.kc-navy .kval{color:var(--navy);}
+.kc-pass .kval{color:var(--pass);}
+.kc-part .kval{color:var(--part);}
+.kc-fail .kval{color:var(--fail);}
+.kc-accent .kval{color:var(--accent);}
+.klbl{font-size:10.5px;color:var(--gray-400);line-height:1.4;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;}
+
+/* ════════════════════════════════════════════════════════
+   CHARTS & PANELS
+   ════════════════════════════════════════════════════════ */
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+.ccard{background:#fff;border-radius:12px;padding:22px 24px;box-shadow:var(--card-shadow);display:flex;flex-direction:column;}
+.ccard-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;}
+.ctitle{font-size:14px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--navy);margin-bottom:4px;}
+.csub{font-size:11.5px;color:var(--gray-400);}
+.chart-wrap{position:relative;flex:1;width:100%;min-height:280px;}
+
+/* COMPARISON PANEL */
+.compare-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:8px;padding:16px;margin-bottom:20px;}
+.compare-header{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap;}
+.compare-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));gap:16px;}
+.comp-card{background:#fff;border:1px solid var(--gray-200);border-radius:8px;padding:16px;}
+.comp-name{font-size:15px;font-weight:800;color:var(--navy);border-bottom:2px solid var(--teal);padding-bottom:8px;margin-bottom:12px;}
+.comp-stat{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed var(--gray-200);font-size:12px;}
+.comp-stat:last-child{border:none;}
+.comp-lbl{color:var(--gray-400);}
+.comp-val{font-weight:700;}
+.comp-topic{font-size:11.5px;background:var(--gray-100);padding:4px 8px;border-radius:4px;margin-top:4px;display:inline-block;}
+
+/* ════════════════════════════════════════════════════════
+   TABLE
+   ════════════════════════════════════════════════════════ */
+.tcard{background:#fff;border-radius:12px;padding:22px 24px;box-shadow:var(--card-shadow);margin-bottom:20px;}
+.tcard-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap;}
+.ttitle{font-size:14px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--navy);}
+.tsub{font-size:11.5px;color:var(--gray-400);}
+.tbl-scroll{overflow-x:auto;}
+table.dt{width:100%;border-collapse:collapse;}
+table.dt thead tr{background:var(--navy);color:#fff;}
+table.dt thead th{padding:12px 14px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;text-align:center;white-space:nowrap;cursor:pointer;user-select:none;position:sticky;top:0;z-index:10;}
+table.dt thead th:hover{background:#1c3350;}
+table.dt thead th.left{text-align:left;}
+table.dt tbody tr{border-bottom:1px solid var(--gray-200);transition:background .15s;}
+table.dt tbody tr:hover{background:var(--gray-50);}
+table.dt td{padding:12px 14px;font-size:13px;text-align:center;vertical-align:middle;white-space:nowrap;}
+table.dt td.left{text-align:left;}
+
+.rb{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:800;}
+.rb.pass{background:var(--pass-bg);color:var(--pass);}
+.rb.part{background:var(--part-bg);color:var(--part);}
+.rb.fail{background:var(--fail-bg);color:var(--fail);}
+
+.score-bar-wrap{display:flex;align-items:center;gap:10px;justify-content:center;}
+.score-bar{height:8px;border-radius:4px;background:var(--gray-200);width:60px;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:4px;transition:width .4s;}
+.score-num{font-size:13px;font-weight:800;width:32px;text-align:right;}
+
+/* Pagination */
+.pagination{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:16px;}
+.page-btn{padding:6px 12px;border:1px solid var(--gray-200);background:#fff;border-radius:6px;font-size:12px;font-family:'Sarabun',sans-serif;font-weight:600;cursor:pointer;transition:all .2s;}
+.page-btn:hover:not(:disabled){background:var(--gray-50);border-color:var(--teal);color:var(--teal);}
+.page-btn.active{background:var(--teal);color:#fff;border-color:var(--teal);}
+.page-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.page-info{font-size:11.5px;color:var(--gray-400);margin-right:12px;}
+
+/* Actions */
+.action-group{display:flex;gap:6px;justify-content:center;}
+.btn-icon{width:28px;height:28px;border-radius:6px;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;font-size:14px;background:var(--gray-100);color:var(--text);}
+.btn-icon:hover{background:var(--gray-300);transform:translateY(-1px);}
+.btn-icon.view:hover{background:var(--teal);color:#fff;}
+.btn-icon.edit:hover{background:var(--accent);color:#fff;}
+.btn-icon.del:hover{background:var(--fail);color:#fff;}
+
+/* ════════════════════════════════════════════════════════
+   MODAL (VIEW DETAIL)
+   ════════════════════════════════════════════════════════ */
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(22,40,64,0.6);backdrop-filter:blur(3px);z-index:1000;display:none;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;}
+.modal-overlay.show{display:flex;opacity:1;}
+.modal-box{background:#fff;border-radius:12px;width:90%;max-width:700px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 10px 30px rgba(0,0,0,0.2);transform:translateY(20px);transition:transform 0.3s;}
+.modal-overlay.show .modal-box{transform:translateY(0);}
+.modal-header{padding:16px 24px;border-bottom:1px solid var(--gray-200);display:flex;justify-content:space-between;align-items:center;background:var(--navy);color:#fff;border-radius:12px 12px 0 0;}
+.modal-title{font-size:16px;font-weight:800;}
+.btn-close{background:transparent;border:none;color:#fff;font-size:24px;cursor:pointer;opacity:0.7;transition:0.2s;}
+.btn-close:hover{opacity:1;}
+.modal-body{padding:24px;overflow-y:auto;flex:1;}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--gray-200);display:flex;justify-content:flex-end;gap:12px;}
+
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;background:var(--gray-50);padding:16px;border-radius:8px;}
+.detail-item{display:flex;flex-direction:column;}
+.detail-lbl{font-size:10px;text-transform:uppercase;color:var(--gray-400);letter-spacing:1px;font-weight:700;}
+.detail-val{font-size:14px;font-weight:600;color:var(--navy);}
+
+.score-list{border:1px solid var(--gray-200);border-radius:8px;overflow:hidden;}
+.score-item{display:flex;padding:12px 16px;border-bottom:1px solid var(--gray-200);align-items:center;background:#fff;}
+.score-item:last-child{border-bottom:none;}
+.score-no{width:30px;font-weight:800;color:var(--gray-400);}
+.score-name{flex:1;font-size:12px;color:var(--navy);padding-right:12px;}
+.score-point{font-weight:800;font-size:14px;width:40px;text-align:center;padding:4px;border-radius:4px;}
+.score-point.p2{background:var(--pass-bg);color:var(--pass);}
+.score-point.p1{background:var(--part-bg);color:var(--part);}
+.score-point.p0{background:var(--fail-bg);color:var(--fail);}
+
+/* ════════════════════════════════════════════════════════
+   TOAST NOTIFICATION
+   ════════════════════════════════════════════════════════ */
+.toast-container{position:fixed;bottom:20px;right:20px;z-index:2000;display:flex;flex-direction:column;gap:10px;}
+.toast{background:#fff;border-left:4px solid var(--teal);padding:12px 20px;border-radius:4px;box-shadow:0 4px 12px rgba(0,0,0,0.15);display:flex;align-items:center;gap:12px;font-weight:600;transform:translateX(120%);transition:transform 0.3s;}
+.toast.show{transform:translateX(0);}
+.toast.error{border-left-color:var(--fail);}
+.toast.warning{border-left-color:var(--part);}
+
+/* ════════════════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════════════════ */
+@media(max-width:1200px){
+  .kpi-grid{grid-template-columns:repeat(3,1fr);}
+  .chart-row{grid-template-columns:1fr;}
+}
+@media(max-width:768px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .content{padding:16px;}
+  .toolbar-top{flex-direction:column;align-items:stretch;}
+  .toolbar-actions{justify-content:flex-end;}
+  .exec-summary{flex-direction:column;text-align:center;gap:12px;padding:20px;}
+  .detail-grid{grid-template-columns:1fr;}
+}
+@media(max-width:480px){
+  .kpi-grid{grid-template-columns:1fr;}
+  .ph-right{display:none;}
+  .toolbar-filters{flex-direction:column;align-items:stretch;}
+  .fsel, .finp{max-width:100%;}
+}
+</style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <h3 style="color:var(--navy);font-weight:700;">กำลังโหลด History Center...</h3>
+  <p id="loading-msg" style="color:var(--gray-400);font-size:12px;margin-top:8px;">เชื่อมต่อฐานข้อมูล Enterprise Data</p>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<div class="ph">
+  <div class="ph-stripe"></div>
+  <div class="ph-body">
+    <div class="ph-tag">Enterprise Command Center</div>
+    <div class="ph-h1">Evaluation History Center</div>
+    <div class="ph-sub">ระบบสืบค้น วิเคราะห์ และเปรียบเทียบประวัติการประเมิน Auditor</div>
+  </div>
+  <div class="ph-right">
+    <div class="icon-box">📂</div>
+    <div class="nav-links">
+      <a class="nav-link" href="db_rm.html">📊 Dashboard</a>
+      <a class="nav-link" href="audit2.html" target="_blank">📝 New Evaluation</a>
+      <a class="nav-link active" href="#">📂 History</a>
+      <a class="nav-link" href="#">🏆 Ranking</a>
+    </div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <div class="toolbar-top">
+    <div class="toolbar-actions">
+      <span class="fl" style="font-weight:bold; font-size:12px; color:var(--navy);">Advanced Search:</span>
+      <input type="text" class="finp" id="f-search" placeholder="ค้นหาชื่อ, แผนก, ผู้ประเมิน..." oninput="debounceSearch()">
+      <input type="date" class="finp" id="f-dateFrom" onchange="applyFilters()">
+      <span class="fl">-</span>
+      <input type="date" class="finp" id="f-dateTo" onchange="applyFilters()">
+    </div>
+    <div class="toolbar-actions">
+      <span id="last-update" style="font-size:10px;color:var(--gray-400);margin-right:10px;"></span>
+      <button class="btn-action btn-outline" onclick="fetchData(true)">🔄 Refresh</button>
+      <button class="btn-action btn-secondary" onclick="resetFilters()">↺ Reset</button>
+      <div style="width:1px;height:24px;background:var(--gray-200);margin:0 8px;"></div>
+      <button class="btn-action btn-secondary" onclick="exportData('csv')">📑 CSV</button>
+      <button class="btn-action btn-secondary" onclick="exportData('excel')">📊 Excel</button>
+      <button class="btn-action btn-primary" onclick="window.print()">🖨️ Print</button>
+    </div>
+  </div>
+  
+  <div class="toolbar-filters">
+    <div class="filter-group">
+      <span class="fl">ปี</span><select class="fsel" id="f-year" onchange="applyFilters()"></select>
+    </div>
+    <div class="filter-group">
+      <span class="fl">ไตรมาส</span><select class="fsel" id="f-quarter" onchange="applyFilters()"></select>
+    </div>
+    <div class="filter-group">
+      <span class="fl">เดือน</span><select class="fsel" id="f-month" onchange="applyFilters()"></select>
+    </div>
+    <div class="filter-group">
+      <span class="fl">Auditor</span><select class="fsel" id="f-auditor" onchange="applyFilters()"></select>
+    </div>
+    <div class="filter-group">
+      <span class="fl">แผนก</span><select class="fsel" id="f-dept" onchange="applyFilters()"></select>
+    </div>
+    <div class="filter-group">
+      <span class="fl">ผู้ประเมิน</span><select class="fsel" id="f-eval" onchange="applyFilters()"></select>
+    </div>
+    <div class="filter-group">
+      <span class="fl">ผลลัพธ์</span>
+      <select class="fsel" id="f-result" onchange="applyFilters()">
+        <option value="all">ทั้งหมด</option>
+        <option value="PASS">PASS (ผ่าน)</option>
+        <option value="CONDITIONAL">CONDITIONAL (ปรับปรุง)</option>
+        <option value="FAIL">FAIL (ไม่ผ่าน)</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+
+  <div class="kpi-grid">
+    <div class="kcard kc-navy"><div class="kicon">📄</div><div class="kinfo"><div class="kval" id="k-total">0</div><div class="klbl">Total Records</div></div></div>
+    <div class="kcard kc-teal"><div class="kicon">⭐</div><div class="kinfo"><div class="kval" id="k-avg">0.0</div><div class="klbl">Average Score</div></div></div>
+    <div class="kcard kc-pass"><div class="kicon">✅</div><div class="kinfo"><div class="kval" id="k-pass">0%</div><div class="klbl">Pass Rate</div></div></div>
+    <div class="kcard kc-accent"><div class="kicon">👥</div><div class="kinfo"><div class="kval" id="k-auds">0</div><div class="klbl">Unique Auditors</div></div></div>
+    <div class="kcard kc-navy"><div class="kicon">📅</div><div class="kinfo"><div class="kval" id="k-last" style="font-size:16px;margin-top:6px;">-</div><div class="klbl">Last Evaluation</div></div></div>
+    <div class="kcard kc-part"><div class="kicon">⚠️</div><div class="kinfo"><div class="kval" id="k-need">0</div><div class="klbl">Need Improvement</div></div></div>
+  </div>
+
+  <div class="exec-summary">
+    <div class="exec-icon">💡</div>
+    <div class="exec-content" id="smart-summary">
+      <div class="skeleton" style="width:200px;height:14px;margin-bottom:8px;"></div>
+      <div class="skeleton" style="width:400px;height:20px;margin-bottom:4px;"></div>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="ccard">
+      <div class="ccard-header">
+        <div><div class="ctitle">📈 Performance Trend</div><div class="csub">แนวโน้มคะแนนเฉลี่ยรายเดือน (ตามช่วงเวลาที่ค้นหา)</div></div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-trend"></canvas></div>
+    </div>
+    <div class="ccard">
+      <div class="ccard-header">
+        <div><div class="ctitle">🔥 Weakness Analysis</div><div class="csub">หัวข้อที่มีคะแนนต่ำที่สุด (ค่าเฉลี่ยต่ำกว่า 1.5)</div></div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-weak"></canvas></div>
+    </div>
+  </div>
+
+  <div class="compare-box">
+    <div class="compare-header">
+      <div class="ctitle" style="margin:0;">⚖️ Auditor Comparison Tool</div>
+      <select class="fsel" id="comp-1" onchange="renderComparison()"><option value="">เลือก Auditor 1</option></select>
+      <select class="fsel" id="comp-2" onchange="renderComparison()"><option value="">เลือก Auditor 2</option></select>
+      <select class="fsel" id="comp-3" onchange="renderComparison()"><option value="">เลือก Auditor 3 (Optional)</option></select>
+      <button class="btn-action btn-secondary" onclick="clearComparison()">Clear</button>
+    </div>
+    <div class="compare-grid" id="compare-grid">
+      <div style="color:var(--gray-400);font-size:12px;grid-column:1/-1;">* กรุณาเลือกชื่อ Auditor ด้านบนเพื่อเปรียบเทียบข้อมูล</div>
+    </div>
+  </div>
+
+  <div class="tcard">
+    <div class="tcard-head">
+      <div><div class="ttitle">📋 Evaluation History Table</div><div class="tsub" id="tbl-info">แสดงรายการประวัติทั้งหมด</div></div>
+      <div class="action-group">
+         <select class="fsel" id="f-rows" onchange="changeRowsPerPage()">
+           <option value="10">10 แถว</option>
+           <option value="25">25 แถว</option>
+           <option value="50">50 แถว</option>
+           <option value="100">100 แถว</option>
+         </select>
+      </div>
+    </div>
+    <div class="tbl-scroll">
+      <table class="dt" id="historyTable">
+        <thead>
+          <tr>
+            <th onclick="toggleSort('id')">No ↕</th>
+            <th onclick="toggleSort('date')">Date ↕</th>
+            <th class="left" onclick="toggleSort('name')">Auditor ↕</th>
+            <th class="left" onclick="toggleSort('dept')">Department ↕</th>
+            <th class="left" onclick="toggleSort('evaluator')">Evaluator ↕</th>
+            <th>Round</th>
+            <th onclick="toggleSort('total')">Score ↕</th>
+            <th onclick="toggleSort('pct')">Percent ↕</th>
+            <th onclick="toggleSort('verdict')">Result ↕</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="history-tbody"></tbody>
+      </table>
+    </div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+
+</div>
+
+<div class="modal-overlay" id="viewModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">📄 Evaluation Detail</div>
+      <button class="btn-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="detail-grid">
+        <div class="detail-item"><span class="detail-lbl">Auditor</span><span class="detail-val" id="md-name"></span></div>
+        <div class="detail-item"><span class="detail-lbl">Department</span><span class="detail-val" id="md-dept"></span></div>
+        <div class="detail-item"><span class="detail-lbl">Evaluator</span><span class="detail-val" id="md-eval"></span></div>
+        <div class="detail-item"><span class="detail-lbl">Date & Round</span><span class="detail-val" id="md-date"></span></div>
+        <div class="detail-item"><span class="detail-lbl">Total Score</span><span class="detail-val" id="md-score" style="color:var(--teal)"></span></div>
+        <div class="detail-item"><span class="detail-lbl">Result</span><span class="detail-val" id="md-result"></span></div>
+      </div>
+      
+      <div style="font-weight:800;color:var(--navy);margin-bottom:8px;font-size:14px;">คะแนนรายหัวข้อ</div>
+      <div class="score-list" id="md-scores"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-action btn-secondary" onclick="window.print()">🖨️ Print</button>
+      <button class="btn-action btn-primary" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════
+   SYSTEM CONFIG & STATE
+   ════════════════════════════════════════════════════════ */
+const API_URL = "https://script.google.com/macros/s/AKfycbx14gNHhWOf9SZKs0mExkjXRqRDxViDy682Z47LHA29ODWWAN2r3G0Rynbo9IHxh-cuww/exec?action=getDashboardData";
+
+let RAW_DATA = [];
+let FILTERED_DATA = [];
+let CHART_INSTANCES = {};
+
+// Pagination & Sorting State
+let currentPage = 1;
+let rowsPerPage = 10;
+let sortCol = 'date';
+let sortAsc = false;
+let searchTimeout = null;
+
+const TOPIC_LABELS = [
+  "01 ความถูกต้องเอกสาร", "02 การวัดความชื้น", "03 การเก็บตัวอย่าง",
+  "04 การคัดมัดผ่า", "05 ประเมินจับจั๊ว", "06 การถ่ายภาพ",
+  "07 ความปลอดภัย", "08 การชี้แจงผู้ขับรถ", "09 ตรวจตู้ IOCC", "10 รับรองรายงาน"
+];
+
+/* ════════════════════════════════════════════════════════
+   INITIALIZATION & DATA FETCHING
+   ════════════════════════════════════════════════════════ */
+window.onload = () => {
+  fetchData(false);
+};
+
+async function fetchData(isRefresh) {
+  const overlay = document.getElementById('loading-overlay');
+  overlay.style.display = 'flex';
+  setTimeout(() => overlay.style.opacity = '1', 10);
+  
+  try {
+    const response = await fetch(API_URL);
+    const json = await response.json();
+    RAW_DATA = json.history || json;
+    if(!Array.isArray(RAW_DATA)) RAW_DATA = generateMockData(); // Fallback
+  } catch (error) {
+    console.warn("Fetch error, using mock data.", error);
+    RAW_DATA = generateMockData();
+  }
+
+  // Pre-process Data (Ensure correct types)
+  RAW_DATA.forEach(r => {
+    r.id = parseInt(r.id);
+    r.total = parseFloat(r.total);
+    r.pct = parseFloat(r.pct);
+    r.scores = r.scores || Array(10).fill(0);
+  });
+
+  if(!isRefresh) buildFilterOptions();
+  
+  applyFilters();
+
+  overlay.style.opacity = '0';
+  setTimeout(() => overlay.style.display = 'none', 300);
+  document.getElementById('last-update').innerText = `อัปเดต: ${new Date().toLocaleTimeString('th-TH')}`;
+  
+  if(isRefresh) showToast('รีเฟรชข้อมูลล่าสุดสำเร็จ', 'success');
+}
+
+/* ════════════════════════════════════════════════════════
+   MOCK DATA (Fallback)
+   ════════════════════════════════════════════════════════ */
+function generateMockData() {
+  const data = [];
+  const names = ["สมชาย ใจดี", "สุชาดา รักงาน", "วิชัย มั่นคง", "พิมพ์ใจ ขยัน", "ธนาคาร ตั้งใจ"];
+  const depts = ["QC / รับเศษ", "Production", "Warehouse"];
+  const evals = ["วิรัตน์ ศรีสมบัติ", "หัวหน้า ก.", "หัวหน้า ข."];
+  const today = new Date();
+  
+  for (let i = 1; i <= 150; i++) {
+    const d = new Date(today.getFullYear(), today.getMonth() - Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1);
+    const m = d.getMonth() + 1;
+    const q = m<=3?'Q1':m<=6?'Q2':m<=9?'Q3':'Q4';
+    const scores = Array.from({length: 10}, () => Math.random() > 0.2 ? (Math.random() > 0.4 ? 2 : 1) : 0);
+    if(Math.random()>0.6) scores[4] = 0; // Bias weak point
+    const total = scores.reduce((a,b)=>a+b,0);
+    const pct = (total/20)*100;
+    const verdict = total >= 16 ? "PASS" : total >= 12 ? "CONDITIONAL" : "FAIL";
+
+    data.push({
+      id: i, name: names[Math.floor(Math.random() * names.length)], dept: depts[Math.floor(Math.random() * depts.length)],
+      date: d.toISOString().split('T')[0], evaluator: evals[Math.floor(Math.random() * evals.length)],
+      round: `${q}/${Math.floor(Math.random()*3)+1}`, total, pct, verdict, scores
+    });
+  }
+  return data;
+}
+
+/* ════════════════════════════════════════════════════════
+   FILTER LOGIC
+   ════════════════════════════════════════════════════════ */
+function buildFilterOptions() {
+  const years = new Set(), depts = new Set(), evals = new Set(), auds = new Set();
+  RAW_DATA.forEach(r => {
+    if(r.date) years.add(r.date.substring(0,4));
+    depts.add(r.dept); evals.add(r.evaluator); auds.add(r.name);
+  });
+
+  const populate = (id, set, defText) => {
+    const el = document.getElementById(id);
+    el.innerHTML = `<option value="all">${defText}</option>`;
+    [...set].filter(Boolean).sort().forEach(v => el.innerHTML += `<option value="${v}">${v}</option>`);
+  };
+
+  populate('f-year', years, "ทุกปี");
+  document.getElementById('f-quarter').innerHTML = `<option value="all">ทุกไตรมาส</option><option value="Q1">Q1</option><option value="Q2">Q2</option><option value="Q3">Q3</option><option value="Q4">Q4</option>`;
+  document.getElementById('f-month').innerHTML = `<option value="all">ทุกเดือน</option>` + Array.from({length:12}, (_,i)=>`<option value="${String(i+1).padStart(2,'0')}">เดือน ${String(i+1).padStart(2,'0')}</option>`).join('');
+  
+  populate('f-dept', depts, "ทุกแผนก");
+  populate('f-eval', evals, "ทุกคน");
+  populate('f-auditor', auds, "ทุกคน");
+
+  populate('comp-1', auds, "เลือก Auditor 1");
+  populate('comp-2', auds, "เลือก Auditor 2");
+  populate('comp-3', auds, "เลือก Auditor 3 (Optional)");
+}
+
+function debounceSearch() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(applyFilters, 300);
+}
+
+function applyFilters() {
+  const y = document.getElementById('f-year').value;
+  const q = document.getElementById('f-quarter').value;
+  const m = document.getElementById('f-month').value;
+  const d = document.getElementById('f-dept').value;
+  const e = document.getElementById('f-eval').value;
+  const a = document.getElementById('f-auditor').value;
+  const res = document.getElementById('f-result').value;
+  const dFrom = document.getElementById('f-dateFrom').value;
+  const dTo = document.getElementById('f-dateTo').value;
+  const search = document.getElementById('f-search').value.toLowerCase();
+
+  FILTERED_DATA = RAW_DATA.filter(row => {
+    if(!row.date) return false;
+    const rowY = row.date.substring(0,4);
+    const rowM = row.date.substring(5,7);
+    const rowQ = rowM<="03"?'Q1':rowM<="06"?'Q2':rowM<="09"?'Q3':'Q4';
+    
+    if (y !== 'all' && rowY !== y) return false;
+    if (q !== 'all' && rowQ !== q) return false;
+    if (m !== 'all' && rowM !== m) return false;
+    if (d !== 'all' && row.dept !== d) return false;
+    if (e !== 'all' && row.evaluator !== e) return false;
+    if (a !== 'all' && row.name !== a) return false;
+    if (res !== 'all' && row.verdict !== res) return false;
+    if (dFrom && row.date < dFrom) return false;
+    if (dTo && row.date > dTo) return false;
+    
+    if (search) {
+      const combined = `${row.name} ${row.dept} ${row.evaluator} ${row.id}`.toLowerCase();
+      if (!combined.includes(search)) return false;
+    }
+    return true;
+  });
+
+  currentPage = 1;
+  sortData();
+  renderAll();
+}
+
+function resetFilters() {
+  document.querySelectorAll('.fsel, .finp').forEach(el => {
+    if(el.tagName === 'SELECT') el.value = el.id.startsWith('comp') ? "" : "all";
+    else el.value = "";
+  });
+  applyFilters();
+  clearComparison();
+}
+
+/* ════════════════════════════════════════════════════════
+   RENDER COMPONENTS
+   ════════════════════════════════════════════════════════ */
+function renderAll() {
+  renderSummaryCards();
+  renderSmartSummary();
+  renderTable();
+  renderCharts();
+  renderComparison();
+}
+
+function renderSummaryCards() {
+  const total = FILTERED_DATA.length;
+  let sumScore = 0, passCount = 0, needCount = 0;
+  const audSet = new Set();
+  let latest = '';
+
+  FILTERED_DATA.forEach(r => {
+    sumScore += r.pct;
+    if (r.verdict === 'PASS') passCount++;
+    if (r.verdict === 'CONDITIONAL' || r.verdict === 'FAIL') needCount++;
+    audSet.add(r.name);
+    if(r.date > latest) latest = r.date;
+  });
+
+  const avg = total ? (sumScore/total).toFixed(1) : "0.0";
+  const passRate = total ? Math.round((passCount/total)*100) : 0;
+  
+  document.getElementById('k-total').innerText = total;
+  document.getElementById('k-avg').innerText = avg + '%';
+  document.getElementById('k-pass').innerText = passRate + '%';
+  document.getElementById('k-auds').innerText = audSet.size;
+  document.getElementById('k-need').innerText = needCount;
+  
+  let lastStr = "-";
+  if(latest){
+    const ld = new Date(latest);
+    lastStr = ld.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});
+  }
+  document.getElementById('k-last').innerText = lastStr;
+}
+
+function renderSmartSummary() {
+  const el = document.getElementById('smart-summary');
+  if(FILTERED_DATA.length === 0){
+    el.innerHTML = `<p>ไม่พบข้อมูลประวัติในช่วงเวลาหรือเงื่อนไขที่เลือก กรุณาปรับเปลี่ยน Filter</p>`;
+    return;
+  }
+
+  const total = FILTERED_DATA.length;
+  const avg = (FILTERED_DATA.reduce((sum,r)=>sum+r.pct,0)/total).toFixed(1);
+  const pass = Math.round((FILTERED_DATA.filter(r=>r.verdict==='PASS').length / total)*100);
+  
+  const sums = Array(10).fill(0), counts = Array(10).fill(0);
+  FILTERED_DATA.forEach(r => {
+    r.scores.forEach((s,i)=>{ sums[i]+=s; counts[i]++; });
+  });
+  
+  let minScore = 2, weakTopic = 0;
+  sums.forEach((s,i)=>{
+    const topicAvg = counts[i] ? s/counts[i] : 2;
+    if(topicAvg < minScore){ minScore = topicAvg; weakTopic = i; }
+  });
+
+  el.innerHTML = `
+    <h2>📊 Intelligence Summary</h2>
+    <p>
+      จากการค้นหาพบข้อมูลประวัติการประเมินทั้งหมด <strong>${total}</strong> รายการ 
+      มีคะแนนเฉลี่ยอยู่ที่ <strong>${avg}%</strong> และมีอัตราการผ่านเกณฑ์ (PASS) ที่ <strong>${pass}%</strong><br>
+      หัวข้อที่ควรได้รับการฝึกอบรมเพิ่มเติมมากที่สุดคือ <strong>${TOPIC_LABELS[weakTopic]}</strong> (คะแนนเฉลี่ย ${(minScore/2*100).toFixed(0)}%)
+    </p>
+  `;
+}
+
+/* ════════════════════════════════════════════════════════
+   TABLE & PAGINATION & SORTING
+   ════════════════════════════════════════════════════════ */
+function toggleSort(col) {
+  if(sortCol === col) sortAsc = !sortAsc;
+  else { sortCol = col; sortAsc = true; }
+  sortData();
+  renderTable();
+}
+
+function sortData() {
+  FILTERED_DATA.sort((a,b) => {
+    let valA = a[sortCol], valB = b[sortCol];
+    if(typeof valA === 'string') valA = valA.toLowerCase();
+    if(typeof valB === 'string') valB = valB.toLowerCase();
+    
+    if(valA < valB) return sortAsc ? -1 : 1;
+    if(valA > valB) return sortAsc ? 1 : -1;
+    return 0;
+  });
+}
+
+function changeRowsPerPage() {
+  rowsPerPage = parseInt(document.getElementById('f-rows').value);
+  currentPage = 1;
+  renderTable();
+}
+
+function renderTable() {
+  const tbody = document.getElementById('history-tbody');
+  const pagination = document.getElementById('pagination');
+  
+  if (FILTERED_DATA.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10" style="padding:40px;color:var(--gray-400);">📂 ไม่พบรายการประเมินที่ตรงกับเงื่อนไขค้นหา</td></tr>`;
+    pagination.innerHTML = '';
+    document.getElementById('tbl-info').innerText = 'แสดง 0 รายการ';
+    return;
+  }
+
+  const totalPages = Math.ceil(FILTERED_DATA.length / rowsPerPage);
+  if(currentPage > totalPages) currentPage = totalPages;
+  
+  const startIdx = (currentPage - 1) * rowsPerPage;
+  const endIdx = startIdx + rowsPerPage;
+  const pageData = FILTERED_DATA.slice(startIdx, endIdx);
+
+  document.getElementById('tbl-info').innerText = `แสดง ${startIdx+1} - ${Math.min(endIdx, FILTERED_DATA.length)} จาก ${FILTERED_DATA.length} รายการ`;
+
+  tbody.innerHTML = pageData.map((row, idx) => {
+    const cls = row.verdict==='PASS' ? 'pass' : row.verdict==='CONDITIONAL' ? 'part' : 'fail';
+    const bColor = row.pct>=80 ? 'var(--pass)' : row.pct>=60 ? 'var(--part)' : 'var(--fail)';
+    const dStr = new Date(row.date).toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'});
+    
+    return `
+      <tr>
+        <td style="color:var(--gray-400);font-weight:600">${startIdx + idx + 1}</td>
+        <td>${dStr}</td>
+        <td class="left" style="font-weight:700;color:var(--navy);">${escapeHtml(row.name)}</td>
+        <td class="left" style="color:var(--gray-400);font-size:11.5px">${escapeHtml(row.dept)}</td>
+        <td class="left">${escapeHtml(row.evaluator)}</td>
+        <td><span style="background:var(--gray-100);padding:4px 8px;border-radius:4px;font-size:11px;">${escapeHtml(row.round)}</span></td>
+        <td style="font-weight:800;color:${bColor}">${row.total}</td>
+        <td>
+          <div class="score-bar-wrap">
+            <div class="score-bar"><div class="score-bar-fill" style="width:${row.pct}%;background:${bColor}"></div></div>
+            <span class="score-num" style="color:${bColor}">${row.pct}%</span>
+          </div>
+        </td>
+        <td><span class="rb ${cls}">${row.verdict}</span></td>
+        <td>
+          <div class="action-group">
+            <button class="btn-icon view" title="View Detail" onclick="viewDetail(${row.id})">👁️</button>
+            <button class="btn-icon edit" title="Edit" onclick="editEval(${row.id})">✏️</button>
+            <button class="btn-icon del" title="Delete" onclick="deleteEval(${row.id})">🗑️</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  renderPagination(totalPages);
+}
+
+function renderPagination(totalPages) {
+  const pag = document.getElementById('pagination');
+  let html = `<span class="page-info">หน้า ${currentPage} / ${totalPages}</span>`;
+  html += `<button class="page-btn" ${currentPage===1?'disabled':''} onclick="gotoPage(1)">«</button>`;
+  html += `<button class="page-btn" ${currentPage===1?'disabled':''} onclick="gotoPage(${currentPage-1})">‹</button>`;
+  
+  let startP = Math.max(1, currentPage - 2);
+  let endP = Math.min(totalPages, currentPage + 2);
+  
+  for(let i=startP; i<=endP; i++){
+    html += `<button class="page-btn ${i===currentPage?'active':''}" onclick="gotoPage(${i})">${i}</button>`;
+  }
+
+  html += `<button class="page-btn" ${currentPage===totalPages?'disabled':''} onclick="gotoPage(${currentPage+1})">›</button>`;
+  html += `<button class="page-btn" ${currentPage===totalPages?'disabled':''} onclick="gotoPage(${totalPages})">»</button>`;
+  pag.innerHTML = html;
+}
+
+function gotoPage(p) {
+  currentPage = p;
+  renderTable();
+}
+
+/* ════════════════════════════════════════════════════════
+   CHARTS
+   ════════════════════════════════════════════════════════ */
+function renderCharts() {
+  // 1. Trend Chart
+  const tCtx = document.getElementById('chart-trend');
+  if(CHART_INSTANCES['trend']) CHART_INSTANCES['trend'].destroy();
+  
+  const monthly = {};
+  [...FILTERED_DATA].sort((a,b)=>a.date.localeCompare(b.date)).forEach(r=>{
+    const m = r.date.substring(0,7);
+    if(!monthly[m]) monthly[m] = {sum:0, count:0};
+    monthly[m].sum += r.pct; monthly[m].count++;
+  });
+  
+  const mLabels = Object.keys(monthly).slice(-12);
+  const mData = mLabels.map(m => (monthly[m].sum/monthly[m].count).toFixed(1));
+
+  CHART_INSTANCES['trend'] = new Chart(tCtx, {
+    type: 'line',
+    data: {
+      labels: mLabels,
+      datasets: [{
+        label: 'Avg %', data: mData, borderColor: '#0A7E72', backgroundColor: 'rgba(10,126,114,0.1)',
+        borderWidth: 3, pointBackgroundColor: '#E8961A', pointRadius: 4, fill: true, tension: 0.3
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100 } } }
+  });
+
+  // 2. Weakness Bar Chart
+  const wCtx = document.getElementById('chart-weak');
+  if(CHART_INSTANCES['weak']) CHART_INSTANCES['weak'].destroy();
+
+  const sums = Array(10).fill(0), counts = Array(10).fill(0);
+  FILTERED_DATA.forEach(r => r.scores.forEach((s,i)=>{ sums[i]+=s; counts[i]++; }));
+  
+  const avgs = TOPIC_LABELS.map((lbl, i) => ({ label: `T${i+1}`, full: lbl, avg: counts[i] ? sums[i]/counts[i] : 2 }));
+  avgs.sort((a,b) => a.avg - b.avg); // Lowest first
+  const weakTop5 = avgs.slice(0,5);
+
+  CHART_INSTANCES['weak'] = new Chart(wCtx, {
+    type: 'bar',
+    data: {
+      labels: weakTop5.map(a=>a.label),
+      datasets: [{
+        data: weakTop5.map(a=>a.avg),
+        backgroundColor: weakTop5.map(a=>a.avg<1.2?'#B71C1C':a.avg<1.6?'#BF6000':'#E8961A'),
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, plugins: { 
+        legend: { display: false },
+        tooltip: { callbacks: { title: (ctx)=> weakTop5[ctx[0].dataIndex].full } }
+      },
+      scales: { y: { min: 0, max: 2 } }
+    }
+  });
+}
+
+/* ════════════════════════════════════════════════════════
+   AUDITOR COMPARISON
+   ════════════════════════════════════════════════════════ */
+function clearComparison() {
+  document.getElementById('comp-1').value = "";
+  document.getElementById('comp-2').value = "";
+  document.getElementById('comp-3').value = "";
+  renderComparison();
+}
+
+function renderComparison() {
+  const grid = document.getElementById('compare-grid');
+  const selNames = [
+    document.getElementById('comp-1').value,
+    document.getElementById('comp-2').value,
+    document.getElementById('comp-3').value
+  ].filter(Boolean);
+
+  if(selNames.length === 0) {
+    grid.innerHTML = '<div style="color:var(--gray-400);font-size:12px;grid-column:1/-1;">* กรุณาเลือกชื่อ Auditor ด้านบนเพื่อเปรียบเทียบข้อมูล</div>';
+    return;
+  }
+
+  let html = '';
+  selNames.forEach(name => {
+    const records = RAW_DATA.filter(r => r.name === name);
+    if(records.length === 0) return;
+    
+    const count = records.length;
+    const avgPct = (records.reduce((s,r)=>s+r.pct,0)/count).toFixed(1);
+    const passRate = Math.round((records.filter(r=>r.verdict==='PASS').length / count)*100);
+    
+    const sums = Array(10).fill(0);
+    records.forEach(r => r.scores.forEach((s,i)=> sums[i]+=s));
+    
+    let bestIdx = 0, worstIdx = 0, maxVal = -1, minVal = 999;
+    sums.forEach((val, i) => {
+      const a = val/count;
+      if(a > maxVal){ maxVal = a; bestIdx = i; }
+      if(a < minVal){ minVal = a; worstIdx = i; }
+    });
+
+    html += `
+      <div class="comp-card">
+        <div class="comp-name">👤 ${escapeHtml(name)}</div>
+        <div class="comp-stat"><span class="comp-lbl">จำนวนประเมิน</span><span class="comp-val">${count} ครั้ง</span></div>
+        <div class="comp-stat"><span class="comp-lbl">คะแนนเฉลี่ย</span><span class="comp-val" style="color:var(--teal)">${avgPct}%</span></div>
+        <div class="comp-stat"><span class="comp-lbl">Pass Rate</span><span class="comp-val">${passRate}%</span></div>
+        <div style="margin-top:12px;">
+          <div class="comp-lbl" style="font-size:10px;">💪 จุดแข็งที่สุด</div>
+          <div class="comp-topic" style="color:var(--pass)">${TOPIC_LABELS[bestIdx]}</div>
+        </div>
+        <div style="margin-top:8px;">
+          <div class="comp-lbl" style="font-size:10px;">⚠️ จุดที่ต้องพัฒนา</div>
+          <div class="comp-topic" style="color:var(--fail)">${TOPIC_LABELS[worstIdx]}</div>
+        </div>
+      </div>
+    `;
+  });
+  grid.innerHTML = html;
+}
+
+/* ════════════════════════════════════════════════════════
+   ACTIONS & MODAL
+   ════════════════════════════════════════════════════════ */
+function viewDetail(id) {
+  const row = RAW_DATA.find(r => r.id === id);
+  if(!row) return;
+
+  document.getElementById('md-name').innerText = row.name;
+  document.getElementById('md-dept').innerText = row.dept;
+  document.getElementById('md-eval').innerText = row.evaluator;
+  
+  const dStr = new Date(row.date).toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'});
+  document.getElementById('md-date').innerText = `${dStr} (รอบ: ${row.round})`;
+  document.getElementById('md-score').innerText = `${row.total}/20 (${row.pct}%)`;
+  
+  const cls = row.verdict==='PASS' ? 'pass' : row.verdict==='CONDITIONAL' ? 'part' : 'fail';
+  document.getElementById('md-result').innerHTML = `<span class="rb ${cls}">${row.verdict}</span>`;
+
+  document.getElementById('md-scores').innerHTML = TOPIC_LABELS.map((lbl, i) => {
+    const s = row.scores[i];
+    return `
+      <div class="score-item">
+        <div class="score-no">${String(i+1).padStart(2,'0')}</div>
+        <div class="score-name">${lbl}</div>
+        <div class="score-point p${s}">${s}</div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('viewModal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('viewModal').classList.remove('show');
+}
+
+function editEval(id) {
+  showToast(`Redirecting to Edit Form for ID: ${id}`, 'success');
+  // Logic to open audit2.html with ID query param
+  setTimeout(()=> window.open(`audit2.html?edit=${id}`, '_blank'), 1000);
+}
+
+function deleteEval(id) {
+  if(confirm(`⚠️ ยืนยันการลบประวัติการประเมิน ID: ${id} หรือไม่?\nการกระทำนี้ไม่สามารถกู้คืนได้`)) {
+    // Mock API Call
+    showToast(`กำลังลบข้อมูล ID: ${id}...`, 'warning');
+    setTimeout(() => {
+      RAW_DATA = RAW_DATA.filter(r => r.id !== id);
+      applyFilters();
+      showToast(`ลบข้อมูล ID: ${id} สำเร็จ`, 'success');
+    }, 800);
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   EXPORTS
+   ════════════════════════════════════════════════════════ */
+function exportData(type) {
+  if(FILTERED_DATA.length === 0){
+    showToast('ไม่มีข้อมูลสำหรับ Export', 'error'); return;
+  }
+  showToast(`กำลังเตรียมไฟล์ ${type.toUpperCase()}...`, 'success');
+  
+  if (type === 'csv') {
+    let csv = "ID,Date,Auditor,Department,Evaluator,Round,TotalScore,Percentage,Verdict\n";
+    FILTERED_DATA.forEach(r => {
+      csv += `"${r.id}","${r.date}","${r.name}","${r.dept}","${r.evaluator}","${r.round}","${r.total}","${r.pct}","${r.verdict}"\n`;
+    });
+    const blob = new Blob(["\uFEFF"+csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `History_Export_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  } else if (type === 'excel') {
+    // Requires SheetJS (XLSX)
+    const wsData = [["ID", "Date", "Auditor", "Department", "Evaluator", "Round", "Total Score", "Percentage", "Verdict", ...TOPIC_LABELS]];
+    FILTERED_DATA.forEach(r => {
+      wsData.push([r.id, r.date, r.name, r.dept, r.evaluator, r.round, r.total, r.pct, r.verdict, ...r.scores]);
+    });
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "History");
+    XLSX.writeFile(wb, `History_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
+  }
+}
+
+/* ════════════════════════════════════════════════════════
+   UTILITIES
+   ════════════════════════════════════════════════════════ */
+function escapeHtml(str) {
+  if(!str) return '';
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function showToast(msg, type='success') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span>${type==='success'?'✅':type==='error'?'❌':'⚠️'}</span><span>${escapeHtml(msg)}</span>`;
+  container.appendChild(toast);
+  
+  // Animate in
+  setTimeout(()=> toast.classList.add('show'), 10);
+  // Auto remove
+  setTimeout(()=> {
+    toast.classList.remove('show');
+    setTimeout(()=> toast.remove(), 300);
+  }, 3000);
+}
+
+// Auto-refresh every 5 minutes if visible
+setInterval(() => {
+  if (document.visibilityState === 'visible') fetchData(true);
+}, 300000);
+
+</script>
+</body>
+</html>
