@@ -627,7 +627,7 @@ async function downloadPDF(){
   try{
     if(document.fonts && document.fonts.ready){ await document.fonts.ready; }
     const target = document.getElementById('captureArea');
-    const canvas = await html2canvas(target, {scale:2, useCORS:true, backgroundColor:'#ffffff'});
+    const canvas = await html2canvas(target, {scale:1, useCORS:true, backgroundColor:'#ffffff'});
 
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p','mm','a4');
