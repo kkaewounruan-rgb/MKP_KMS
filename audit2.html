@@ -29,8 +29,10 @@ body{font-family:'Sarabun',sans-serif;background:var(--gray-100);color:var(--tex
 .ph-tag{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:5px;}
 .ph-h1{font-size:19px;font-weight:800;line-height:1.25;margin-bottom:2px;}
 .ph-sub{font-size:11.5px;color:rgba(255,255,255,.5);}
-.ph-icon{padding:18px 26px;display:flex;align-items:center;justify-content:center;border-left:1px solid rgba(255,255,255,.1);}
-.icon-box{width:52px;height:52px;background:var(--teal);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;}
+.ph-right{padding:18px 26px;display:flex;align-items:center;gap:16px;border-left:1px solid rgba(255,255,255,.1);}
+.icon-box{width:52px;height:52px;background:var(--teal);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+.btn-link{text-decoration:none;background:rgba(255,255,255,0.1);color:#fff;padding:8px 16px;border-radius:8px;font-weight:700;font-size:12px;border:1px solid rgba(255,255,255,0.2);transition:all 0.2s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.btn-link:hover{background:var(--teal);border-color:var(--teal);}
 
 /* ── META ── */
 .meta{background:#fff;border-bottom:2.5px solid var(--teal);padding:14px 26px;}
@@ -172,7 +174,7 @@ tr.dr.rf{background:var(--fail-bg);}
   .meta-grid { grid-template-columns: 1fr 1fr; }
   .sgrid { grid-template-columns: 1fr 1fr; }
   .ph-body, .banner, .meta, .tw, .sum, .abar, .cloud-note { padding-left: 16px; padding-right: 16px; }
-  .ph-icon { padding: 18px 16px; }
+  .ph-right { padding: 18px 16px; gap: 10px; }
 }
 
 /* Mobile Mode (max-width: 767px) */
@@ -187,6 +189,9 @@ tr.dr.rf{background:var(--fail-bg);}
 
   .ph-h1 { font-size: 16px; }
   .ph-sub { line-height: 1.4; }
+  
+  .ph-right { padding: 10px 16px; flex-direction: column-reverse; justify-content: center; gap: 8px; }
+  .btn-link { padding: 5px 10px; font-size: 10.5px; }
   .icon-box { width: 42px; height: 42px; font-size: 20px; }
 
   /* ปรับปุ่มในตารางให้เรียงแนวนอนบนมือถือ */
@@ -202,7 +207,7 @@ tr.dr.rf{background:var(--fail-bg);}
 
 /* ── PRINT STYLES ── */
 @media print{
-  .abar, .ph-icon, .cloud-note {display:none;}
+  .abar, .ph-right, .cloud-note {display:none;}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   .tw { padding: 0; overflow-x: visible; }
   .ri{
@@ -217,12 +222,10 @@ tr.dr.rf{background:var(--fail-bg);}
 </head>
 <body>
 
-<!-- ⚠️ ถ้ายังไม่ตั้งค่า Web App URL ของ Google Apps Script จะมีข้อความเตือนแถบนี้ขึ้นมา -->
 <div class="cloud-note" id="cloud-note">
   ⚠️ ยังไม่ได้เชื่อมต่อ Google Sheets — แก้ค่า <code>SHEET_WEB_APP_URL</code> ในโค้ด (ดูวิธีตั้งค่าในไฟล์ Code.gs)
 </div>
 
-<!-- ครอบทุกส่วนที่ต้องการ "พิมพ์ออกเป็น PDF" ไว้ใน captureArea (ไม่รวม action bar) -->
 <div id="captureArea">
 
 <div class="ph">
@@ -233,7 +236,10 @@ tr.dr.rf{background:var(--fail-bg);}
       <span style="font-weight:400;font-size:15px">การตรวจรับเศษ / วัตถุดิบ ปี 2569</span></div>
     <div class="ph-sub">แบบฟอร์ม FM-AUDIT-01 &nbsp;|&nbsp; 10 หัวข้อประเมิน &nbsp;|&nbsp; คะแนนเต็ม 20 คะแนน</div>
   </div>
-  <div class="ph-icon"><div class="icon-box">📋</div></div>
+  <div class="ph-right">
+    <a href="db_rm.html" class="btn-link" target="_blank">📊 ดู Dashboard</a>
+    <div class="icon-box">📋</div>
+  </div>
 </div>
 
 <div class="meta">
@@ -296,9 +302,7 @@ tr.dr.rf{background:var(--fail-bg);}
   <div id="s-ftable"></div>
 </div>
 
-</div><!-- /captureArea -->
-
-<div class="abar">
+</div><div class="abar">
   <button class="btn btn-p" onclick="showSum()">📊 สรุปผล</button>
   <button class="btn btn-p" id="btn-save" onclick="saveToSheet()">☁️ กดบันทึก(กันข้อมูลหาย)</button>
   <button class="btn btn-s" id="btn-pdf" onclick="downloadPDF()">📄 ดาวน์โหลด PDF</button>
@@ -308,7 +312,6 @@ tr.dr.rf{background:var(--fail-bg);}
   <span class="anote">คะแนน : 2 = ดีเยี่ยม &nbsp;/&nbsp; 1 = พอใช้ &nbsp;/&nbsp; 0 = ไม่ผ่าน &nbsp;|&nbsp; เต็ม 20 คะแนน</span>
 </div>
 
-<!-- Libraries for client-side PDF export (no backend needed) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -318,8 +321,8 @@ tr.dr.rf{background:var(--fail-bg);}
    1) Deploy ไฟล์ Code.gs เป็น Web App (ดูคำแนะนำในไฟล์ Code.gs)
    2) นำ URL ที่ได้มาแทนที่ค่าด้านล่างนี้
    ════════════════════════════════════════════════════════════════ */
-const SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzTCzqifuB0KTXgR4x-6UYlioc0SBG5tgX8Q6-cM-bsbdwQ9UiFAGMNvrCtO8Vlvl_Mog/exec";
-  
+const SHEET_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx14gNHhWOf9SZKs0mExkjXRqRDxViDy682Z47LHA29ODWWAN2r3G0Rynbo9IHxh-cuww/exec";
+
 const DATA = [
   {
     group:"📄 เอกสาร & การตรวจนับ",
