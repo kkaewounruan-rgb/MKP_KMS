@@ -31,6 +31,29 @@
 body{font-family:'Sarabun',sans-serif;background:var(--gray-100);color:var(--text);font-size:13px;min-height:100vh;overflow-x:hidden;}
 
 /* ════════════════════════════════════════════════════════
+   AUTO-HIDE TOP MENU (MOBILE ONLY)
+   ════════════════════════════════════════════════════════ */
+.top-header {
+  transition: transform 0.3s ease-in-out;
+  width: 100%;
+}
+@media(max-width: 767px) {
+  .top-header {
+    position: sticky;
+    top: 0;
+    z-index: 900;
+  }
+  .top-header.hidden {
+    transform: translateY(-100%);
+  }
+  .toolbar {
+    position: relative !important;
+    top: auto !important;
+    z-index: auto !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════
    LOADING OVERLAY & PERFORMANCE (Phase 10)
    ════════════════════════════════════════════════════════ */
 #loading-overlay {
@@ -210,38 +233,40 @@ table.dt td.left{text-align:left;}
   <p id="loading-msg" style="color:var(--gray-400);font-size:12px;margin-top:8px;">เชื่อมต่อฐานข้อมูล Google Sheets</p>
 </div>
 
-<div class="ph">
-  <div class="ph-stripe"></div>
-  <div class="ph-body">
-    <div class="ph-tag">Command Center — Performance Analytics</div>
-    <div class="ph-h1">ระบบติดตามผล Auditor ระดับองค์กร</div>
-    <div class="ph-sub">การตรวจรับเศษ/วัตถุดิบ &nbsp;|&nbsp; ข้อมูลอัปเดตแบบเรียลไทม์</div>
-  </div>
-  <div class="ph-right">
-    <div class="icon-box">🏢</div>
-    <div class="nav-links">
-      <a class="nav-link active" href="db_rm.html">📊 Dashboard</a>
-	  <a class="nav-link" href="audit2.html" target="_blank">📝 New checksheet</a>
-      <a class="nav-link" href="history.html">📂 History</a>
-      <a class="nav-link" href="#">🏆 Ranking</a>
+<div id="top-header" class="top-header">
+  <div class="ph">
+    <div class="ph-stripe"></div>
+    <div class="ph-body">
+      <div class="ph-tag">Command Center — Performance Analytics</div>
+      <div class="ph-h1">ระบบติดตามผล Auditor ระดับองค์กร</div>
+      <div class="ph-sub">การตรวจรับเศษ/วัตถุดิบ &nbsp;|&nbsp; ข้อมูลอัปเดตแบบเรียลไทม์</div>
+    </div>
+    <div class="ph-right">
+      <div class="icon-box">🏢</div>
+      <div class="nav-links">
+        <a class="nav-link active" href="db_rm.html">📊 Dashboard</a>
+        <a class="nav-link" href="audit2.html" target="_blank">📝 New checksheet</a>
+        <a class="nav-link" href="history.html">📂 History</a>
+        <a class="nav-link" href="#">🏆 Ranking</a>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="toolbar">
-  <div class="filter-group">
-    <span class="fl">ปี</span><select class="fsel" id="f-year" onchange="applyFilters()"></select>
-    <span class="fl">ไตรมาส</span><select class="fsel" id="f-quarter" onchange="applyFilters()"></select>
-    <span class="fl">เดือน</span><select class="fsel" id="f-month" onchange="applyFilters()"></select>
-    <span class="fl">แผนก</span><select class="fsel" id="f-dept" onchange="applyFilters()"></select>
-    <span class="fl">ผู้ประเมิน</span><select class="fsel" id="f-evaluator" onchange="applyFilters()"></select>
-    <span class="fl">Auditor</span><select class="fsel" id="f-auditor" onchange="applyFilters()"></select>
-  </div>
-  <div class="toolbar-actions">
-    <span id="last-update" style="font-size:10px;color:var(--gray-400);margin-right:10px;"></span>
-    <button class="btn-action btn-outline" onclick="fetchData()">🔄 <span class="hide-mobile">Refresh</span></button>
-    <button class="btn-action btn-secondary" onclick="exportCSV()">📊 <span class="hide-mobile">Export CSV</span></button>
-    <button class="btn-action btn-primary" onclick="openNewEval()">➕ <span class="hide-mobile">New Eval</span></button>
+  <div class="toolbar">
+    <div class="filter-group">
+      <span class="fl">ปี</span><select class="fsel" id="f-year" onchange="applyFilters()"></select>
+      <span class="fl">ไตรมาส</span><select class="fsel" id="f-quarter" onchange="applyFilters()"></select>
+      <span class="fl">เดือน</span><select class="fsel" id="f-month" onchange="applyFilters()"></select>
+      <span class="fl">แผนก</span><select class="fsel" id="f-dept" onchange="applyFilters()"></select>
+      <span class="fl">ผู้ประเมิน</span><select class="fsel" id="f-evaluator" onchange="applyFilters()"></select>
+      <span class="fl">Auditor</span><select class="fsel" id="f-auditor" onchange="applyFilters()"></select>
+    </div>
+    <div class="toolbar-actions">
+      <span id="last-update" style="font-size:10px;color:var(--gray-400);margin-right:10px;"></span>
+      <button class="btn-action btn-outline" onclick="fetchData()">🔄 <span class="hide-mobile">Refresh</span></button>
+      <button class="btn-action btn-secondary" onclick="exportCSV()">📊 <span class="hide-mobile">Export CSV</span></button>
+      <button class="btn-action btn-primary" onclick="openNewEval()">➕ <span class="hide-mobile">New Eval</span></button>
+    </div>
   </div>
 </div>
 
@@ -343,10 +368,30 @@ table.dt td.left{text-align:left;}
 
 </div><script>
 /* ════════════════════════════════════════════════════════
+   AUTO-HIDE MENU SCRIPT
+   ════════════════════════════════════════════════════════ */
+let lastScrollTop = 0;
+const topHeader = document.getElementById('top-header');
+
+window.addEventListener('scroll', function() {
+  if (window.innerWidth <= 767) {
+    let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    if (scrollTop > lastScrollTop && scrollTop > 50) {
+      topHeader.classList.add('hidden');
+    } else {
+      topHeader.classList.remove('hidden');
+    }
+    lastScrollTop = scrollTop;
+  } else {
+    topHeader.classList.remove('hidden');
+  }
+});
+
+/* ════════════════════════════════════════════════════════
    SYSTEM CONFIG & STATE
    ════════════════════════════════════════════════════════ */
 // Phase 1: URL ของ Google Apps Script Web App
-const API_URL = "https://script.google.com/macros/s/AKfycbx14gNHhWOf9SZKs0mExkjXRqRDxViDy682Z47LHA29ODWWAN2r3G0Rynbo9IHxh-cuww/exec?action=getDashboardData"; // e.g., "https://script.google.com/macros/s/.../exec?action=getDashboardData"
+const API_URL = "https://script.google.com/macros/s/AKfycbx14gNHhWOf9SZKs0mExkjXRqRDxViDy682Z47LHA29ODWWAN2r3G0Rynbo9IHxh-cuww/exec?action=getDashboardData"; 
 
 let RAW_DATA = [];
 let FILTERED_DATA = [];
@@ -414,9 +459,8 @@ async function fetchData() {
       const json = await response.json();
       RAW_DATA = json.history || json; 
     } else {
-      // Phase 9: Fallback to mock data for GitHub Pages demo
       document.getElementById('loading-msg').innerText = "API URL ว่างเปล่า โหลดข้อมูลจำลอง...";
-      await new Promise(r => setTimeout(r, 800)); // Simulate network latency
+      await new Promise(r => setTimeout(r, 800));
       RAW_DATA = generateMockData();
     }
   } catch (error) {
@@ -444,7 +488,6 @@ function buildFilters() {
   const fEval = document.getElementById('f-evaluator');
   const fAud = document.getElementById('f-auditor');
 
-  // Keep current selections if exist
   const curY = fYear.value || new Date().getFullYear().toString();
   const curQ = fQuarter.value || 'all';
   const curM = fMonth.value || 'all';
@@ -516,26 +559,19 @@ function renderAll() {
   renderHistory();
 }
 
-/* ════════════════════════════════════════════════════════
-   PHASE 2 & 8: KPIs & EXECUTIVE SUMMARY
-   ════════════════════════════════════════════════════════ */
 function renderKPIs() {
   const total = FILTERED_DATA.length;
   let sumScore = 0, passCount = 0, audSet = new Set();
   const topicSums = Array(10).fill(0), topicCounts = Array(10).fill(0);
-  
   const currentMonthStr = new Date().toISOString().substring(0,7);
   let thisMonthEvals = 0;
-
   const auditorStats = {};
 
   FILTERED_DATA.forEach(r => {
     sumScore += r.total;
     if (r.verdict === 'PASS') passCount++;
     audSet.add(r.name);
-    
     if (r.date.startsWith(currentMonthStr)) thisMonthEvals++;
-
     r.scores.forEach((s,i) => { topicSums[i]+=s; topicCounts[i]++; });
 
     if(!auditorStats[r.name]) auditorStats[r.name] = { total:0, count:0 };
@@ -547,7 +583,6 @@ function renderKPIs() {
   const passRate = total ? Math.round((passCount / total) * 100) : 0;
   const weakTopics = topicSums.filter((sum,i) => (topicCounts[i] ? sum/topicCounts[i] : 2) < 1.5).length;
 
-  // Best / Lowest Auditor
   let bestAud = "-", lowestAud = "-", maxAvg = -1, minAvg = 21;
   for (const [name, stat] of Object.entries(auditorStats)) {
     const avg = stat.total / stat.count;
@@ -572,7 +607,6 @@ function renderExecSummary() {
     return;
   }
 
-  // Calculate current vs previous month (approximated for demo logic)
   const sorted = [...FILTERED_DATA].sort((a,b)=>b.date.localeCompare(a.date));
   const latestDate = new Date(sorted[0].date);
   const curMonthPrefix = latestDate.toISOString().substring(0,7);
@@ -582,8 +616,7 @@ function renderExecSummary() {
 
   FILTERED_DATA.forEach(r => {
     if (r.date.startsWith(curMonthPrefix)) curMonthScores.push(r.pct);
-    else prevMonthScores.push(r.pct); // Everything else as "previous" relative to selection
-    
+    else prevMonthScores.push(r.pct);
     r.scores.forEach((s,i) => { topicSums[i]+=s; topicCounts[i]++; });
   });
 
@@ -609,14 +642,10 @@ function renderExecSummary() {
   `;
 }
 
-/* ════════════════════════════════════════════════════════
-   PHASE 3, 4, 5: CHARTS & HEATMAP & RANKING
-   ════════════════════════════════════════════════════════ */
 function renderTrendChart() {
   const ctx = document.getElementById('chart-trend');
   if (CHART_INSTANCES['trend']) CHART_INSTANCES['trend'].destroy();
 
-  // Aggregate by month (YYYY-MM)
   const monthly = {};
   FILTERED_DATA.forEach(r => {
     const m = r.date.substring(0,7);
@@ -625,8 +654,7 @@ function renderTrendChart() {
     monthly[m].count++;
   });
 
-  const sortedMonths = Object.keys(monthly).sort(); // chronological
-  // Take last 12
+  const sortedMonths = Object.keys(monthly).sort(); 
   const labels = sortedMonths.slice(-12);
   const dataAvg = labels.map(m => (monthly[m].sum / monthly[m].count).toFixed(1));
 
@@ -639,21 +667,10 @@ function renderTrendChart() {
         data: dataAvg,
         borderColor: '#0A7E72',
         backgroundColor: 'rgba(10,126,114,0.1)',
-        borderWidth: 3,
-        pointBackgroundColor: '#E8961A',
-        pointRadius: 4,
-        fill: true,
-        tension: 0.3
+        borderWidth: 3, pointBackgroundColor: '#E8961A', pointRadius: 4, fill: true, tension: 0.3
       }]
     },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { min: 0, max: 100, grid: { color: '#E0E4E8', borderDash: [5,5] } },
-        x: { grid: { display: false } }
-      }
-    }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100 } } }
   });
 }
 
@@ -672,16 +689,9 @@ function renderVerdictChart() {
     type: 'doughnut',
     data: {
       labels: ['PASS','CONDITIONAL','FAIL'],
-      datasets: [{
-        data: [pass, cond, fail],
-        backgroundColor: ['#0A7E72','#BF6000','#B71C1C'],
-        borderWidth: 0, hoverOffset: 4
-      }]
+      datasets: [{ data: [pass, cond, fail], backgroundColor: ['#0A7E72','#BF6000','#B71C1C'], borderWidth: 0, hoverOffset: 4 }]
     },
-    options: {
-      responsive: true, maintainAspectRatio: false, cutout: '70%',
-      plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15, font:{family:'Sarabun'} } } }
-    }
+    options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15, font:{family:'Sarabun'} } } } }
   });
 }
 
@@ -692,8 +702,7 @@ function renderAuditorsChart() {
   const audStats = {};
   FILTERED_DATA.forEach(r => {
     if(!audStats[r.name]) audStats[r.name] = { sum:0, count:0 };
-    audStats[r.name].sum += r.total;
-    audStats[r.name].count++;
+    audStats[r.name].sum += r.total; audStats[r.name].count++;
   });
 
   const names = Object.keys(audStats);
@@ -702,199 +711,87 @@ function renderAuditorsChart() {
 
   CHART_INSTANCES['auditors'] = new Chart(ctx, {
     type: 'bar',
-    data: {
-      labels: names,
-      datasets: [{
-        label: 'Avg Score (/20)',
-        data: avgs,
-        backgroundColor: colors,
-        borderRadius: 4
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { min: 0, max: 20, grid: { color: '#E0E4E8' } },
-        x: { grid: { display: false }, ticks: { maxRotation: 45, minRotation: 45 } }
-      }
-    }
+    data: { labels: names, datasets: [{ label: 'Avg Score (/20)', data: avgs, backgroundColor: colors, borderRadius: 4 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 20 }, x: { grid: { display: false }, ticks: { maxRotation: 45, minRotation: 45 } } } }
   });
 }
 
 function renderHeatmap() {
   const container = document.getElementById('heatmap-container');
-  
-  if(FILTERED_DATA.length === 0){
-    container.innerHTML = `<div class="empty-state"><div class="empty-icon">📂</div>ไม่มีข้อมูล</div>`;
-    return;
-  }
+  if(FILTERED_DATA.length === 0){ container.innerHTML = `<div class="empty-state"><div class="empty-icon">📂</div>ไม่มีข้อมูล</div>`; return; }
 
   const sums = Array(10).fill(0), counts = Array(10).fill(0);
-  FILTERED_DATA.forEach(r => {
-    r.scores.forEach((s,i) => { sums[i]+=s; counts[i]++; });
-  });
+  FILTERED_DATA.forEach(r => { r.scores.forEach((s,i) => { sums[i]+=s; counts[i]++; }); });
 
-  const averages = TOPIC_LABELS.map((label, i) => {
-    return {
-      label: label,
-      avg: counts[i] ? sums[i] / counts[i] : 0
-    };
-  });
-
-  // Sort lowest to highest, take top 5
+  const averages = TOPIC_LABELS.map((label, i) => ({ label: label, avg: counts[i] ? sums[i] / counts[i] : 0 }));
   averages.sort((a,b) => a.avg - b.avg);
   const top5Weak = averages.slice(0,5);
 
   container.innerHTML = top5Weak.map(item => {
     const pct = (item.avg / 2) * 100;
-    // Color logic: <60% Red, <80% Orange, >=80% Yellow
     const cClass = pct < 60 ? 'hm-red' : pct < 80 ? 'hm-orange' : 'hm-yellow';
-    return `
-      <div class="hm-item ${cClass}">
-        <div class="hm-header">
-          <span>${item.label}</span>
-          <span class="hm-score">${item.avg.toFixed(2)} / 2.00</span>
-        </div>
-        <div class="hm-bar-wrap"><div class="hm-bar" style="width: ${pct}%"></div></div>
-      </div>
-    `;
+    return `<div class="hm-item ${cClass}"><div class="hm-header"><span>${item.label}</span><span class="hm-score">${item.avg.toFixed(2)} / 2.00</span></div><div class="hm-bar-wrap"><div class="hm-bar" style="width: ${pct}%"></div></div></div>`;
   }).join('');
 }
 
 function renderRanking() {
   const tbody = document.getElementById('ranking-tbody');
-  
-  if(FILTERED_DATA.length === 0){
-    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">ไม่มีข้อมูล Auditor</td></tr>`;
-    return;
-  }
+  if(FILTERED_DATA.length === 0){ tbody.innerHTML = `<tr><td colspan="6" class="empty-state">ไม่มีข้อมูล Auditor</td></tr>`; return; }
 
   const audStats = {};
   FILTERED_DATA.forEach(r => {
     if(!audStats[r.name]) audStats[r.name] = { dept: r.dept, sum:0, count:0, pass:0 };
-    audStats[r.name].sum += r.pct;
-    audStats[r.name].count++;
+    audStats[r.name].sum += r.pct; audStats[r.name].count++;
     if(r.verdict==='PASS') audStats[r.name].pass++;
   });
 
   const list = Object.keys(audStats).map(name => {
     const s = audStats[name];
-    return {
-      name: name,
-      dept: s.dept,
-      avg: s.sum / s.count,
-      passRate: (s.pass / s.count) * 100
-    };
+    return { name: name, dept: s.dept, avg: s.sum / s.count, passRate: (s.pass / s.count) * 100 };
   });
 
-  // Sort primarily by Avg Score, secondary by Pass Rate
   list.sort((a,b) => b.avg !== a.avg ? b.avg - a.avg : b.passRate - a.passRate);
   const top10 = list.slice(0, 10);
 
   tbody.innerHTML = top10.map((aud, idx) => {
     const rank = idx + 1;
-    const rClass = rank<=3 ? `rank-${rank}` : '';
-    const badge = `<span class="rank-badge ${rClass}">${rank}</span>`;
-    
-    // Status color
+    const badge = `<span class="rank-badge ${rank<=3 ? `rank-${rank}` : ''}">${rank}</span>`;
     const sClass = aud.avg >= 80 ? 'pass' : aud.avg >= 60 ? 'part' : 'fail';
     const sText = aud.avg >= 80 ? 'EXCELLENT' : aud.avg >= 60 ? 'AVERAGE' : 'NEEDS IMPV';
-
-    return `
-      <tr>
-        <td>${badge}</td>
-        <td class="left" style="font-weight:700;color:var(--navy);">${aud.name}</td>
-        <td class="left" style="color:var(--gray-400);font-size:11.5px;">${aud.dept}</td>
-        <td><strong style="color:var(--${sClass});">${aud.avg.toFixed(1)}%</strong></td>
-        <td>
-          <div class="score-bar-wrap">
-            <div class="score-bar"><div class="score-bar-fill" style="width:${aud.passRate}%;background:var(--${sClass})"></div></div>
-            <span class="score-num">${aud.passRate.toFixed(0)}%</span>
-          </div>
-        </td>
-        <td><span class="rb ${sClass}">${sText}</span></td>
-      </tr>
-    `;
+    return `<tr><td>${badge}</td><td class="left" style="font-weight:700;color:var(--navy);">${aud.name}</td><td class="left" style="color:var(--gray-400);font-size:11.5px;">${aud.dept}</td><td><strong style="color:var(--${sClass});">${aud.avg.toFixed(1)}%</strong></td><td><div class="score-bar-wrap"><div class="score-bar"><div class="score-bar-fill" style="width:${aud.passRate}%;background:var(--${sClass})"></div></div><span class="score-num">${aud.passRate.toFixed(0)}%</span></div></td><td><span class="rb ${sClass}">${sText}</span></td></tr>`;
   }).join('');
 }
 
 function renderHistory() {
   const tbody = document.getElementById('history-tbody');
   const sorted = [...FILTERED_DATA].sort((a,b)=>b.date.localeCompare(a.date));
-  
   document.getElementById('tbl-sub').innerText = `แสดง ${sorted.length} รายการ`;
 
-  if(sorted.length===0){
-    tbody.innerHTML=`<tr><td colspan="7" class="empty-state">ไม่มีข้อมูลประวัติในช่วงที่เลือก</td></tr>`;
-    return;
-  }
+  if(sorted.length===0){ tbody.innerHTML=`<tr><td colspan="7" class="empty-state">ไม่มีข้อมูลประวัติในช่วงที่เลือก</td></tr>`; return; }
 
   tbody.innerHTML = sorted.map((e,i) => {
     const cls = e.verdict==='PASS' ? 'pass' : e.verdict==='CONDITIONAL' ? 'part' : 'fail';
     const barColor = e.total>=16 ? 'var(--pass)' : e.total>=12 ? 'var(--part)' : 'var(--fail)';
-    const dateObj = new Date(e.date);
-    const dateStr = dateObj.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'});
-    
-    return `<tr>
-      <td style="color:var(--gray-400);font-weight:600">${String(sorted.length-i).padStart(2,'0')}</td>
-      <td class="left"><div style="font-weight:700;color:var(--navy);">${e.name}</div></td>
-      <td style="white-space:nowrap">${dateStr}</td>
-      <td><span style="background:var(--gray-100);padding:4px 10px;border-radius:6px;font-weight:700;font-size:11px;">${e.round}</span></td>
-      <td class="left" style="color:var(--gray-400);font-size:11.5px">${e.evaluator}</td>
-      <td>
-        <div class="score-bar-wrap">
-          <div class="score-bar"><div class="score-bar-fill" style="width:${e.pct}%;background:${barColor}"></div></div>
-          <span class="score-num" style="color:${barColor}">${e.total}</span>
-        </div>
-      </td>
-      <td><span class="rb ${cls}">${e.verdict}</span></td>
-    </tr>`;
+    const dateStr = new Date(e.date).toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'});
+    return `<tr><td style="color:var(--gray-400);font-weight:600">${String(sorted.length-i).padStart(2,'0')}</td><td class="left"><div style="font-weight:700;color:var(--navy);">${e.name}</div></td><td style="white-space:nowrap">${dateStr}</td><td><span style="background:var(--gray-100);padding:4px 10px;border-radius:6px;font-weight:700;font-size:11px;">${e.round}</span></td><td class="left" style="color:var(--gray-400);font-size:11.5px">${e.evaluator}</td><td><div class="score-bar-wrap"><div class="score-bar"><div class="score-bar-fill" style="width:${e.pct}%;background:${barColor}"></div></div><span class="score-num" style="color:${barColor}">${e.total}</span></div></td><td><span class="rb ${cls}">${e.verdict}</span></td></tr>`;
   }).join('');
 }
 
-/* ════════════════════════════════════════════════════════
-   QUICK ACTIONS (Phase 6) & AUTO REFRESH (Phase 10)
-   ════════════════════════════════════════════════════════ */
-function openNewEval() {
-  window.open('audit2.html', '_blank');
-}
+function openNewEval() { window.open('audit2.html', '_blank'); }
 
 function exportCSV() {
-  if (FILTERED_DATA.length === 0) {
-    alert("ไม่มีข้อมูลสำหรับ Export"); return;
-  }
-  
-  // Headers
+  if (FILTERED_DATA.length === 0) { alert("ไม่มีข้อมูลสำหรับ Export"); return; }
   let csvContent = "ID,Name,Department,Date,Evaluator,Round,TotalScore,Percentage,Verdict\n";
-  
-  FILTERED_DATA.forEach(r => {
-    csvContent += `"${r.id}","${r.name}","${r.dept}","${r.date}","${r.evaluator}","${r.round}","${r.total}","${r.pct.toFixed(1)}","${r.verdict}"\n`;
-  });
-
-  // UTF-8 BOM for Thai characters in Excel
+  FILTERED_DATA.forEach(r => { csvContent += `"${r.id}","${r.name}","${r.dept}","${r.date}","${r.evaluator}","${r.round}","${r.total}","${r.pct.toFixed(1)}","${r.verdict}"\n`; });
   const blob = new Blob(["\uFEFF"+csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
-  link.setAttribute("href", url);
-  link.setAttribute("download", `Auditor_Report_${new Date().toISOString().split('T')[0]}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  link.setAttribute("href", url); link.setAttribute("download", `Auditor_Report_${new Date().toISOString().split('T')[0]}.csv`);
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
 }
 
-// Phase 10: Auto Refresh every 60s
-setInterval(() => {
-  if (document.visibilityState === 'visible') {
-    fetchData(); // Silently updates if API is active
-  }
-}, 60000);
-
-/* ════════════════════════════════════════════════════════
-   INITIALIZATION
-   ════════════════════════════════════════════════════════ */
+setInterval(() => { if (document.visibilityState === 'visible') fetchData(); }, 60000);
 window.onload = fetchData;
-
 </script>
 </body>
 </html>
