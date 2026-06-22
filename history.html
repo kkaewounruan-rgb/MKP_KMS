@@ -31,6 +31,29 @@
 body{font-family:'Sarabun',sans-serif;background:var(--gray-100);color:var(--text);font-size:13px;min-height:100vh;overflow-x:hidden;}
 
 /* ════════════════════════════════════════════════════════
+   AUTO-HIDE TOP MENU (MOBILE ONLY)
+   ════════════════════════════════════════════════════════ */
+.top-header {
+  transition: transform 0.3s ease-in-out;
+  width: 100%;
+}
+@media(max-width: 767px) {
+  .top-header {
+    position: sticky;
+    top: 0;
+    z-index: 900;
+  }
+  .top-header.hidden {
+    transform: translateY(-100%);
+  }
+  .toolbar {
+    position: relative !important;
+    top: auto !important;
+    z-index: auto !important;
+  }
+}
+
+/* ════════════════════════════════════════════════════════
    LOADING OVERLAY & PERFORMANCE
    ════════════════════════════════════════════════════════ */
 #loading-overlay {
@@ -267,71 +290,73 @@ table.dt td.left{text-align:left;}
 
 <div class="toast-container" id="toast-container"></div>
 
-<div class="ph">
-  <div class="ph-stripe"></div>
-  <div class="ph-body">
-    <div class="ph-tag">Enterprise Command Center</div>
-    <div class="ph-h1">Evaluation History Center</div>
-    <div class="ph-sub">ระบบสืบค้น วิเคราะห์ และเปรียบเทียบประวัติการประเมิน Auditor</div>
-  </div>
-  <div class="ph-right">
-    <div class="icon-box">📂</div>
-    <div class="nav-links">
-      <a class="nav-link" href="db_rm.html">📊 Dashboard</a>
-      <a class="nav-link" href="audit2.html" target="_blank">📝 checksheet</a>
-      <a class="nav-link active" href="#">📂 History</a>
-      <a class="nav-link" href="#">🏆 Ranking</a>
+<div id="top-header" class="top-header">
+  <div class="ph">
+    <div class="ph-stripe"></div>
+    <div class="ph-body">
+      <div class="ph-tag">Enterprise Command Center</div>
+      <div class="ph-h1">Evaluation History Center</div>
+      <div class="ph-sub">ระบบสืบค้น วิเคราะห์ และเปรียบเทียบประวัติการประเมิน Auditor</div>
+    </div>
+    <div class="ph-right">
+      <div class="icon-box">📂</div>
+      <div class="nav-links">
+        <a class="nav-link" href="db_rm.html">📊 Dashboard</a>
+        <a class="nav-link" href="audit2.html" target="_blank">📝 New Evaluation</a>
+        <a class="nav-link active" href="#">📂 History</a>
+        <a class="nav-link" href="#">🏆 Ranking</a>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="toolbar">
-  <div class="toolbar-top">
-    <div class="toolbar-actions">
-      <span class="fl" style="font-weight:bold; font-size:12px; color:var(--navy);">Advanced Search:</span>
-      <input type="text" class="finp" id="f-search" placeholder="ค้นหาชื่อ, แผนก, ผู้ประเมิน..." oninput="debounceSearch()">
-      <input type="date" class="finp" id="f-dateFrom" onchange="applyFilters()">
-      <span class="fl">-</span>
-      <input type="date" class="finp" id="f-dateTo" onchange="applyFilters()">
+  <div class="toolbar">
+    <div class="toolbar-top">
+      <div class="toolbar-actions">
+        <span class="fl" style="font-weight:bold; font-size:12px; color:var(--navy);">Advanced Search:</span>
+        <input type="text" class="finp" id="f-search" placeholder="ค้นหาชื่อ, แผนก, ผู้ประเมิน..." oninput="debounceSearch()">
+        <input type="date" class="finp" id="f-dateFrom" onchange="applyFilters()">
+        <span class="fl">-</span>
+        <input type="date" class="finp" id="f-dateTo" onchange="applyFilters()">
+      </div>
+      <div class="toolbar-actions">
+        <span id="last-update" style="font-size:10px;color:var(--gray-400);margin-right:10px;"></span>
+        <button class="btn-action btn-outline" onclick="fetchData(true)">🔄 Refresh</button>
+        <button class="btn-action btn-secondary" onclick="resetFilters()">↺ Reset</button>
+        <div style="width:1px;height:24px;background:var(--gray-200);margin:0 8px;"></div>
+        <button class="btn-action btn-secondary" onclick="exportData('csv')">📑 CSV</button>
+        <button class="btn-action btn-secondary" onclick="exportData('excel')">📊 Excel</button>
+        <button class="btn-action btn-primary" onclick="window.print()">🖨️ Print</button>
+      </div>
     </div>
-    <div class="toolbar-actions">
-      <span id="last-update" style="font-size:10px;color:var(--gray-400);margin-right:10px;"></span>
-      <button class="btn-action btn-outline" onclick="fetchData(true)">🔄 Refresh</button>
-      <button class="btn-action btn-secondary" onclick="resetFilters()">↺ Reset</button>
-      <div style="width:1px;height:24px;background:var(--gray-200);margin:0 8px;"></div>
-      <button class="btn-action btn-secondary" onclick="exportData('csv')">📑 CSV</button>
-      <button class="btn-action btn-secondary" onclick="exportData('excel')">📊 Excel</button>
-      <button class="btn-action btn-primary" onclick="window.print()">🖨️ Print</button>
-    </div>
-  </div>
-  
-  <div class="toolbar-filters">
-    <div class="filter-group">
-      <span class="fl">ปี</span><select class="fsel" id="f-year" onchange="applyFilters()"></select>
-    </div>
-    <div class="filter-group">
-      <span class="fl">ไตรมาส</span><select class="fsel" id="f-quarter" onchange="applyFilters()"></select>
-    </div>
-    <div class="filter-group">
-      <span class="fl">เดือน</span><select class="fsel" id="f-month" onchange="applyFilters()"></select>
-    </div>
-    <div class="filter-group">
-      <span class="fl">Auditor</span><select class="fsel" id="f-auditor" onchange="applyFilters()"></select>
-    </div>
-    <div class="filter-group">
-      <span class="fl">แผนก</span><select class="fsel" id="f-dept" onchange="applyFilters()"></select>
-    </div>
-    <div class="filter-group">
-      <span class="fl">ผู้ประเมิน</span><select class="fsel" id="f-eval" onchange="applyFilters()"></select>
-    </div>
-    <div class="filter-group">
-      <span class="fl">ผลลัพธ์</span>
-      <select class="fsel" id="f-result" onchange="applyFilters()">
-        <option value="all">ทั้งหมด</option>
-        <option value="PASS">PASS (ผ่าน)</option>
-        <option value="CONDITIONAL">CONDITIONAL (ปรับปรุง)</option>
-        <option value="FAIL">FAIL (ไม่ผ่าน)</option>
-      </select>
+    
+    <div class="toolbar-filters">
+      <div class="filter-group">
+        <span class="fl">ปี</span><select class="fsel" id="f-year" onchange="applyFilters()"></select>
+      </div>
+      <div class="filter-group">
+        <span class="fl">ไตรมาส</span><select class="fsel" id="f-quarter" onchange="applyFilters()"></select>
+      </div>
+      <div class="filter-group">
+        <span class="fl">เดือน</span><select class="fsel" id="f-month" onchange="applyFilters()"></select>
+      </div>
+      <div class="filter-group">
+        <span class="fl">Auditor</span><select class="fsel" id="f-auditor" onchange="applyFilters()"></select>
+      </div>
+      <div class="filter-group">
+        <span class="fl">แผนก</span><select class="fsel" id="f-dept" onchange="applyFilters()"></select>
+      </div>
+      <div class="filter-group">
+        <span class="fl">ผู้ประเมิน</span><select class="fsel" id="f-eval" onchange="applyFilters()"></select>
+      </div>
+      <div class="filter-group">
+        <span class="fl">ผลลัพธ์</span>
+        <select class="fsel" id="f-result" onchange="applyFilters()">
+          <option value="all">ทั้งหมด</option>
+          <option value="PASS">PASS (ผ่าน)</option>
+          <option value="CONDITIONAL">CONDITIONAL (ปรับปรุง)</option>
+          <option value="FAIL">FAIL (ไม่ผ่าน)</option>
+        </select>
+      </div>
     </div>
   </div>
 </div>
@@ -446,6 +471,26 @@ table.dt td.left{text-align:left;}
 </div>
 
 <script>
+/* ════════════════════════════════════════════════════════
+   AUTO-HIDE MENU SCRIPT
+   ════════════════════════════════════════════════════════ */
+let lastScrollTop = 0;
+const topHeader = document.getElementById('top-header');
+
+window.addEventListener('scroll', function() {
+  if (window.innerWidth <= 767) {
+    let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    if (scrollTop > lastScrollTop && scrollTop > 50) {
+      topHeader.classList.add('hidden');
+    } else {
+      topHeader.classList.remove('hidden');
+    }
+    lastScrollTop = scrollTop;
+  } else {
+    topHeader.classList.remove('hidden');
+  }
+});
+
 /* ════════════════════════════════════════════════════════
    SYSTEM CONFIG & STATE
    ════════════════════════════════════════════════════════ */
@@ -962,13 +1007,11 @@ function closeModal() {
 
 function editEval(id) {
   showToast(`Redirecting to Edit Form for ID: ${id}`, 'success');
-  // Logic to open audit2.html with ID query param
   setTimeout(()=> window.open(`audit2.html?edit=${id}`, '_blank'), 1000);
 }
 
 function deleteEval(id) {
   if(confirm(`⚠️ ยืนยันการลบประวัติการประเมิน ID: ${id} หรือไม่?\nการกระทำนี้ไม่สามารถกู้คืนได้`)) {
-    // Mock API Call
     showToast(`กำลังลบข้อมูล ID: ${id}...`, 'warning');
     setTimeout(() => {
       RAW_DATA = RAW_DATA.filter(r => r.id !== id);
@@ -998,7 +1041,6 @@ function exportData(type) {
     link.download = `History_Export_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
   } else if (type === 'excel') {
-    // Requires SheetJS (XLSX)
     const wsData = [["ID", "Date", "Auditor", "Department", "Evaluator", "Round", "Total Score", "Percentage", "Verdict", ...TOPIC_LABELS]];
     FILTERED_DATA.forEach(r => {
       wsData.push([r.id, r.date, r.name, r.dept, r.evaluator, r.round, r.total, r.pct, r.verdict, ...r.scores]);
@@ -1025,16 +1067,13 @@ function showToast(msg, type='success') {
   toast.innerHTML = `<span>${type==='success'?'✅':type==='error'?'❌':'⚠️'}</span><span>${escapeHtml(msg)}</span>`;
   container.appendChild(toast);
   
-  // Animate in
   setTimeout(()=> toast.classList.add('show'), 10);
-  // Auto remove
   setTimeout(()=> {
     toast.classList.remove('show');
     setTimeout(()=> toast.remove(), 300);
   }, 3000);
 }
 
-// Auto-refresh every 5 minutes if visible
 setInterval(() => {
   if (document.visibilityState === 'visible') fetchData(true);
 }, 300000);
