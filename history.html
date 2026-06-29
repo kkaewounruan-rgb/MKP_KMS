@@ -19,6 +19,7 @@
   --teal2:   #0D9E90;
   --accent:  #E8961A;
   --pass:    #2E7D32; --pass-bg: #E8F5E9;
+  --gradeb:  #689F38; --gradeb-bg: #F1F8E9;
   --part:    #BF6000; --part-bg: #FFF3E0;
   --fail:    #B71C1C; --fail-bg: #FFEBEE;
   --gray-50: #F9FAFB; --gray-100: #F2F4F6;
@@ -195,6 +196,7 @@ table.dt td.left{text-align:left;}
 
 .rb{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:800;}
 .rb.pass{background:var(--pass-bg);color:var(--pass);}
+.rb.gradeb{background:var(--gradeb-bg);color:var(--gradeb);}
 .rb.part{background:var(--part-bg);color:var(--part);}
 .rb.fail{background:var(--fail-bg);color:var(--fail);}
 
@@ -352,10 +354,10 @@ table.dt td.left{text-align:left;}
         <span class="fl">ผลลัพธ์</span>
         <select class="fsel" id="f-result" onchange="applyFilters()">
           <option value="all">ทั้งหมด</option>
-          <option value="A">Grade A (≥ 80%)</option>
-          <option value="B">Grade B (≥ 70%)</option>
-          <option value="COND">CONDITIONAL (ต้องปรับปรุง)</option>
-          <option value="FAIL">FAIL (ไม่ผ่าน)</option>
+          <option value="A">PASS (Grade A)</option>
+          <option value="B">PASS (Grade B)</option>
+          <option value="COND">Fail(Grade C)</option>
+          <option value="FAIL">Fail (Grade D)</option>
         </select>
       </div>
     </div>
@@ -495,7 +497,7 @@ window.addEventListener('scroll', function() {
 /* ════════════════════════════════════════════════════════
    SYSTEM CONFIG & STATE
    ════════════════════════════════════════════════════════ */
-const API_URL = "https://script.google.com/macros/s/AKfycbyy0YmUbYiAxgG4m8Wjf96lNFP_L-j09JYSHhqzR9VndE1BRr04ek9DIvYZwE8cgtsKCQ/exec?action=getDashboardData";
+const API_URL = "https://script.google.com/macros/s/AKfycbx14gNHhWOf9SZKs0mExkjXRqRDxViDy682Z47LHA29ODWWAN2r3G0Rynbo9IHxh-cuww/exec?action=getDashboardData";
 
 let RAW_DATA = [];
 let FILTERED_DATA = [];
@@ -513,6 +515,15 @@ const TOPIC_LABELS = [
   "04 การคัดมัดผ่า", "05 ประเมินจับจั๊ว", "06 การถ่ายภาพ",
   "07 ความปลอดภัย", "08 การชี้แจงผู้ขับรถ", "09 ตรวจตู้ IOCC", "10 รับรองรายงาน"
 ];
+
+// คำนวณ Grade/สี จาก % สดทุกครั้ง (ไม่พึ่งข้อความ verdict ที่บันทึกไว้ในชีต)
+// เกณฑ์: >=80 Grade A / >=70 Grade B / >=60 Grade C (Fail) / <60 Grade D (Fail)
+function gradeInfo(pct) {
+  if (pct >= 80) return { cls: 'pass',   text: 'PASS (Grade A)' };
+  if (pct >= 70) return { cls: 'gradeb', text: 'PASS (Grade B)' };
+  if (pct >= 60) return { cls: 'part',   text: 'Fail(Grade C)' };
+  return { cls: 'fail', text: 'Fail (Grade D)' };
+}
 
 /* ════════════════════════════════════════════════════════
    INITIALIZATION & DATA FETCHING
@@ -768,8 +779,9 @@ function renderTable() {
 
   tbody.innerHTML = pageData.map((row, idx) => {
     // กำหนดสีและคลาสตามคะแนน (pct) ตรงๆ
-    const cls = row.pct >= 70 ? 'pass' : row.pct >= 60 ? 'part' : 'fail';
-    const bColor = row.pct >= 80 ? 'var(--pass)' : row.pct >= 70 ? 'var(--teal2)' : row.pct >= 60 ? 'var(--part)' : 'var(--fail)';
+    const g = gradeInfo(row.pct);
+    const cls = g.cls;
+    const bColor = row.pct >= 80 ? 'var(--pass)' : row.pct >= 70 ? 'var(--gradeb)' : row.pct >= 60 ? 'var(--part)' : 'var(--fail)';
     const dStr = new Date(row.date).toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'});
     
     return `
@@ -787,7 +799,7 @@ function renderTable() {
             <span class="score-num" style="color:${bColor}">${row.pct}%</span>
           </div>
         </td>
-        <td><span class="rb ${cls}">${row.verdict}</span></td>
+        <td><span class="rb ${cls}">${g.text}</span></td>
         <td>
           <div class="action-group">
             <button class="btn-icon view" title="View Detail" onclick="viewDetail(${row.id})">👁️</button>
@@ -961,8 +973,8 @@ function viewDetail(id) {
   document.getElementById('md-date').innerText = `${dStr} (รอบ: ${row.round})`;
   document.getElementById('md-score').innerText = `${row.total}/20 (${row.pct}%)`;
   
-  const cls = row.pct>=70 ? 'pass' : row.pct>=60 ? 'part' : 'fail';
-  document.getElementById('md-result').innerHTML = `<span class="rb ${cls}">${row.verdict}</span>`;
+  const g = gradeInfo(row.pct);
+  document.getElementById('md-result').innerHTML = `<span class="rb ${g.cls}">${g.text}</span>`;
 
   document.getElementById('md-scores').innerHTML = TOPIC_LABELS.map((lbl, i) => {
     const s = row.scores[i];
