@@ -19,6 +19,7 @@
   --teal2:   #0D9E90;
   --accent:  #E8961A;
   --pass:    #2E7D32; --pass-bg: #E8F5E9;
+  --gradeb:  #689F38; --gradeb-bg: #F1F8E9;
   --part:    #BF6000; --part-bg: #FFF3E0;
   --fail:    #B71C1C; --fail-bg: #FFEBEE;
   --gray-50: #F9FAFB; --gray-100: #F2F4F6;
@@ -193,6 +194,7 @@ table.dt td.left{text-align:left;}
 
 .rb{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:800;}
 .rb.pass{background:var(--pass-bg);color:var(--pass);}
+.rb.gradeb{background:var(--gradeb-bg);color:var(--gradeb);}
 .rb.part{background:var(--part-bg);color:var(--part);}
 .rb.fail{background:var(--fail-bg);color:var(--fail);}
 
@@ -390,7 +392,7 @@ window.addEventListener('scroll', function() {
 /* ════════════════════════════════════════════════════════
    SYSTEM CONFIG & STATE
    ════════════════════════════════════════════════════════ */
-const API_URL = "https://script.google.com/macros/s/AKfycbyy0YmUbYiAxgG4m8Wjf96lNFP_L-j09JYSHhqzR9VndE1BRr04ek9DIvYZwE8cgtsKCQ/exec?action=getDashboardData"; 
+const API_URL = "https://script.google.com/macros/s/AKfycbx14gNHhWOf9SZKs0mExkjXRqRDxViDy682Z47LHA29ODWWAN2r3G0Rynbo9IHxh-cuww/exec?action=getDashboardData"; 
 
 let RAW_DATA = [];
 let FILTERED_DATA = [];
@@ -640,8 +642,8 @@ function renderVerdictChart() {
   CHART_INSTANCES['verdict'] = new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: ['Grade A (≥80%)','Grade B (≥70%)','CONDITIONAL','FAIL'],
-      datasets: [{ data: [a, b, cond, fail], backgroundColor: ['#0A7E72','#0D9E90','#BF6000','#B71C1C'], borderWidth: 0, hoverOffset: 4 }]
+      labels: ['Grade A (≥80%)','Grade B (≥70%)','Grade C - Fail (≥60%)','Grade D - Fail (<60%)'],
+      datasets: [{ data: [a, b, cond, fail], backgroundColor: ['#2E7D32','#689F38','#BF6000','#B71C1C'], borderWidth: 0, hoverOffset: 4 }]
     },
     options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15, font:{family:'Sarabun'} } } } }
   });
@@ -709,9 +711,9 @@ function renderRanking() {
     const rank = idx + 1;
     const badge = `<span class="rank-badge ${rank<=3 ? `rank-${rank}` : ''}">${rank}</span>`;
     
-    // ปรับเกณฑ์ Rank Status ตาม 4 ระดับ
-    const sClass = aud.avg >= 70 ? 'pass' : aud.avg >= 60 ? 'part' : 'fail';
-    const sText = aud.avg >= 80 ? 'GRADE A' : aud.avg >= 70 ? 'GRADE B' : aud.avg >= 60 ? 'CONDITIONAL' : 'FAIL';
+    // ปรับเกณฑ์ Rank Status ตาม 4 ระดับ: A>=80 / B>=70 / C(Fail)>=60 / D(Fail)<60
+    const sClass = aud.avg >= 80 ? 'pass' : aud.avg >= 70 ? 'gradeb' : aud.avg >= 60 ? 'part' : 'fail';
+    const sText = aud.avg >= 80 ? 'Grade A' : aud.avg >= 70 ? 'Grade B' : aud.avg >= 60 ? 'Grade C (Fail)' : 'Grade D (Fail)';
     
     return `<tr><td>${badge}</td><td class="left" style="font-weight:700;color:var(--navy);">${aud.name}</td><td class="left" style="color:var(--gray-400);font-size:11.5px;">${aud.dept}</td><td><strong style="color:var(--${sClass});">${aud.avg.toFixed(1)}%</strong></td><td><div class="score-bar-wrap"><div class="score-bar"><div class="score-bar-fill" style="width:${aud.passRate}%;background:var(--${sClass})"></div></div><span class="score-num">${aud.passRate.toFixed(0)}%</span></div></td><td><span class="rb ${sClass}">${sText}</span></td></tr>`;
   }).join('');
