@@ -1040,7 +1040,7 @@ function exportData(type) {
   if (type === 'csv') {
     let csv = "ID,Date,Auditor,Department,Evaluator,Round,TotalScore,Percentage,Verdict\n";
     FILTERED_DATA.forEach(r => {
-      csv += `"${r.id}","${r.date}","${r.name}","${r.dept}","${r.evaluator}","${r.round}","${r.total}","${r.pct}","${r.verdict}"\n`;
+      csv += `"${r.id}","${r.date}","${r.name}","${r.dept}","${r.evaluator}","${r.round}","${r.total}","${r.pct}","${gradeInfo(r.pct).text}"\n`;
     });
     const blob = new Blob(["\uFEFF"+csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
@@ -1050,7 +1050,7 @@ function exportData(type) {
   } else if (type === 'excel') {
     const wsData = [["ID", "Date", "Auditor", "Department", "Evaluator", "Round", "Total Score", "Percentage", "Verdict", ...TOPIC_LABELS]];
     FILTERED_DATA.forEach(r => {
-      wsData.push([r.id, r.date, r.name, r.dept, r.evaluator, r.round, r.total, r.pct, r.verdict, ...r.scores]);
+      wsData.push([r.id, r.date, r.name, r.dept, r.evaluator, r.round, r.total, r.pct, gradeInfo(r.pct).text, ...r.scores]);
     });
     const ws = XLSX.utils.aoa_to_sheet(wsData);
     const wb = XLSX.utils.book_new();
