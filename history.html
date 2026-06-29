@@ -1010,14 +1010,37 @@ function editEval(id) {
   setTimeout(()=> window.open(`audit2.html?edit=${id}`, '_blank'), 1000);
 }
 
-function deleteEval(id) {
-  if(confirm(`⚠️ ยืนยันการลบประวัติการประเมิน ID: ${id} หรือไม่?\nการกระทำนี้ไม่สามารถกู้คืนได้`)) {
-    showToast(`กำลังลบข้อมูล ID: ${id}...`, 'warning');
-    setTimeout(() => {
+// ⬇️ เปลี่ยนโค้ดส่วนนี้ให้ส่งคำสั่งไปยัง Google Sheets ได้จริง
+async function deleteEval(id) {
+  if(confirm(`⚠️ ยืนยันการลบประวัติการประเมิน ID: ${id} หรือไม่?\nการกระทำนี้จะลบข้อมูลออกจาก Google Sheets และไม่สามารถกู้คืนได้`)) {
+    
+    showToast(`กำลังลบข้อมูล ID: ${id} ออกจากฐานข้อมูล...`, 'warning');
+    
+    try {
+      // ดึง URL หลักของ Apps Script (ลบพารามิเตอร์ ?action=getDashboardData ทิ้ง)
+      const baseUrl = API_URL.split('?')[0]; 
+      
+      // ส่งคำสั่งแบบ POST ไปที่ Apps Script โดยแนบ action='delete'
+      await fetch(baseUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify({ action: 'delete', id: id })
+      });
+      
+      // ลบข้อมูลบนหน้าเว็บชั่วคราวให้ UI ตอบสนองผู้ใช้ทันที
       RAW_DATA = RAW_DATA.filter(r => r.id !== id);
       applyFilters();
-      showToast(`ลบข้อมูล ID: ${id} สำเร็จ`, 'success');
-    }, 800);
+      showToast(`ส่งคำสั่งลบข้อมูลเรียบร้อยแล้ว`, 'success');
+      
+      // หน่วงเวลา 2 วินาที แล้วดึงข้อมูลจาก Google Sheets ใหม่อีกครั้งเพื่ออัปเดตให้ชัวร์
+      setTimeout(() => {
+        fetchData(true);
+      }, 2000);
+
+    } catch (error) {
+      showToast(`เกิดข้อผิดพลาดในการลบข้อมูล: ${error.message}`, 'error');
+    }
   }
 }
 
