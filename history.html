@@ -302,7 +302,7 @@ table.dt td.left{text-align:left;}
       <div class="icon-box">📂</div>
       <div class="nav-links">
         <a class="nav-link" href="db_rm.html">📊 Dashboard</a>
-        <a class="nav-link" href="audit2.html" target="_blank">📝หน้าแบบประเมิน</a>
+        <a class="nav-link" href="audit2.html" target="_blank">📝 New Evaluation</a>
         <a class="nav-link active" href="#">📂 History</a>
         <a class="nav-link" href="#">🏆 Ranking</a>
       </div>
@@ -352,8 +352,9 @@ table.dt td.left{text-align:left;}
         <span class="fl">ผลลัพธ์</span>
         <select class="fsel" id="f-result" onchange="applyFilters()">
           <option value="all">ทั้งหมด</option>
-          <option value="PASS">PASS (ผ่าน)</option>
-          <option value="CONDITIONAL">CONDITIONAL (ปรับปรุง)</option>
+          <option value="A">Grade A (≥ 80%)</option>
+          <option value="B">Grade B (≥ 70%)</option>
+          <option value="COND">CONDITIONAL (ต้องปรับปรุง)</option>
           <option value="FAIL">FAIL (ไม่ผ่าน)</option>
         </select>
       </div>
@@ -494,7 +495,7 @@ window.addEventListener('scroll', function() {
 /* ════════════════════════════════════════════════════════
    SYSTEM CONFIG & STATE
    ════════════════════════════════════════════════════════ */
-const API_URL = "https://script.google.com/macros/s/AKfycbyy0YmUbYiAxgG4m8Wjf96lNFP_L-j09JYSHhqzR9VndE1BRr04ek9DIvYZwE8cgtsKCQ/exec?action=getDashboardData";
+const API_URL = "https://script.google.com/macros/s/AKfycbx14gNHhWOf9SZKs0mExkjXRqRDxViDy682Z47LHA29ODWWAN2r3G0Rynbo9IHxh-cuww/exec?action=getDashboardData";
 
 let RAW_DATA = [];
 let FILTERED_DATA = [];
@@ -529,10 +530,8 @@ async function fetchData(isRefresh) {
     const response = await fetch(API_URL);
     const json = await response.json();
     RAW_DATA = json.history || json;
-    if(!Array.isArray(RAW_DATA)) RAW_DATA = generateMockData(); // Fallback
   } catch (error) {
-    console.warn("Fetch error, using mock data.", error);
-    RAW_DATA = generateMockData();
+    console.warn("Fetch error", error);
   }
 
   // Pre-process Data (Ensure correct types)
@@ -552,35 +551,6 @@ async function fetchData(isRefresh) {
   document.getElementById('last-update').innerText = `อัปเดต: ${new Date().toLocaleTimeString('th-TH')}`;
   
   if(isRefresh) showToast('รีเฟรชข้อมูลล่าสุดสำเร็จ', 'success');
-}
-
-/* ════════════════════════════════════════════════════════
-   MOCK DATA (Fallback)
-   ════════════════════════════════════════════════════════ */
-function generateMockData() {
-  const data = [];
-  const names = ["สมชาย ใจดี", "สุชาดา รักงาน", "วิชัย มั่นคง", "พิมพ์ใจ ขยัน", "ธนาคาร ตั้งใจ"];
-  const depts = ["QC / รับเศษ", "Production", "Warehouse"];
-  const evals = ["วิรัตน์ ศรีสมบัติ", "หัวหน้า ก.", "หัวหน้า ข."];
-  const today = new Date();
-  
-  for (let i = 1; i <= 150; i++) {
-    const d = new Date(today.getFullYear(), today.getMonth() - Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1);
-    const m = d.getMonth() + 1;
-    const q = m<=3?'Q1':m<=6?'Q2':m<=9?'Q3':'Q4';
-    const scores = Array.from({length: 10}, () => Math.random() > 0.2 ? (Math.random() > 0.4 ? 2 : 1) : 0);
-    if(Math.random()>0.6) scores[4] = 0; // Bias weak point
-    const total = scores.reduce((a,b)=>a+b,0);
-    const pct = (total/20)*100;
-    const verdict = total >= 16 ? "PASS" : total >= 12 ? "CONDITIONAL" : "FAIL";
-
-    data.push({
-      id: i, name: names[Math.floor(Math.random() * names.length)], dept: depts[Math.floor(Math.random() * depts.length)],
-      date: d.toISOString().split('T')[0], evaluator: evals[Math.floor(Math.random() * evals.length)],
-      round: `${q}/${Math.floor(Math.random()*3)+1}`, total, pct, verdict, scores
-    });
-  }
-  return data;
 }
 
 /* ════════════════════════════════════════════════════════
@@ -641,7 +611,15 @@ function applyFilters() {
     if (d !== 'all' && row.dept !== d) return false;
     if (e !== 'all' && row.evaluator !== e) return false;
     if (a !== 'all' && row.name !== a) return false;
-    if (res !== 'all' && row.verdict !== res) return false;
+    
+    // กรองผลลัพธ์ด้วยเกณฑ์เป๊ะๆ ตาม % คะแนน
+    if (res !== 'all') {
+      if (res === 'A' && row.pct < 80) return false;
+      if (res === 'B' && (row.pct < 70 || row.pct >= 80)) return false;
+      if (res === 'COND' && (row.pct < 60 || row.pct >= 70)) return false;
+      if (res === 'FAIL' && row.pct >= 60) return false;
+    }
+
     if (dFrom && row.date < dFrom) return false;
     if (dTo && row.date > dTo) return false;
     
@@ -685,8 +663,8 @@ function renderSummaryCards() {
 
   FILTERED_DATA.forEach(r => {
     sumScore += r.pct;
-    if (r.verdict === 'PASS') passCount++;
-    if (r.verdict === 'CONDITIONAL' || r.verdict === 'FAIL') needCount++;
+    if (r.pct >= 70) passCount++; // Grade A และ B นับว่าผ่าน
+    if (r.pct < 70) needCount++;  // ต่ำกว่า 70 คือต้องปรับปรุง/ไม่ผ่าน
     audSet.add(r.name);
     if(r.date > latest) latest = r.date;
   });
@@ -717,7 +695,7 @@ function renderSmartSummary() {
 
   const total = FILTERED_DATA.length;
   const avg = (FILTERED_DATA.reduce((sum,r)=>sum+r.pct,0)/total).toFixed(1);
-  const pass = Math.round((FILTERED_DATA.filter(r=>r.verdict==='PASS').length / total)*100);
+  const pass = Math.round((FILTERED_DATA.filter(r=>r.pct>=70).length / total)*100);
   
   const sums = Array(10).fill(0), counts = Array(10).fill(0);
   FILTERED_DATA.forEach(r => {
@@ -789,8 +767,9 @@ function renderTable() {
   document.getElementById('tbl-info').innerText = `แสดง ${startIdx+1} - ${Math.min(endIdx, FILTERED_DATA.length)} จาก ${FILTERED_DATA.length} รายการ`;
 
   tbody.innerHTML = pageData.map((row, idx) => {
-    const cls = row.verdict==='PASS' ? 'pass' : row.verdict==='CONDITIONAL' ? 'part' : 'fail';
-    const bColor = row.pct>=80 ? 'var(--pass)' : row.pct>=60 ? 'var(--part)' : 'var(--fail)';
+    // กำหนดสีและคลาสตามคะแนน (pct) ตรงๆ
+    const cls = row.pct >= 70 ? 'pass' : row.pct >= 60 ? 'part' : 'fail';
+    const bColor = row.pct >= 80 ? 'var(--pass)' : row.pct >= 70 ? 'var(--teal2)' : row.pct >= 60 ? 'var(--part)' : 'var(--fail)';
     const dStr = new Date(row.date).toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'numeric'});
     
     return `
@@ -850,7 +829,6 @@ function gotoPage(p) {
    CHARTS
    ════════════════════════════════════════════════════════ */
 function renderCharts() {
-  // 1. Trend Chart
   const tCtx = document.getElementById('chart-trend');
   if(CHART_INSTANCES['trend']) CHART_INSTANCES['trend'].destroy();
   
@@ -876,7 +854,6 @@ function renderCharts() {
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 100 } } }
   });
 
-  // 2. Weakness Bar Chart
   const wCtx = document.getElementById('chart-weak');
   if(CHART_INSTANCES['weak']) CHART_INSTANCES['weak'].destroy();
 
@@ -884,7 +861,7 @@ function renderCharts() {
   FILTERED_DATA.forEach(r => r.scores.forEach((s,i)=>{ sums[i]+=s; counts[i]++; }));
   
   const avgs = TOPIC_LABELS.map((lbl, i) => ({ label: `T${i+1}`, full: lbl, avg: counts[i] ? sums[i]/counts[i] : 2 }));
-  avgs.sort((a,b) => a.avg - b.avg); // Lowest first
+  avgs.sort((a,b) => a.avg - b.avg);
   const weakTop5 = avgs.slice(0,5);
 
   CHART_INSTANCES['weak'] = new Chart(wCtx, {
@@ -937,7 +914,7 @@ function renderComparison() {
     
     const count = records.length;
     const avgPct = (records.reduce((s,r)=>s+r.pct,0)/count).toFixed(1);
-    const passRate = Math.round((records.filter(r=>r.verdict==='PASS').length / count)*100);
+    const passRate = Math.round((records.filter(r=>r.pct>=70).length / count)*100);
     
     const sums = Array(10).fill(0);
     records.forEach(r => r.scores.forEach((s,i)=> sums[i]+=s));
@@ -984,7 +961,7 @@ function viewDetail(id) {
   document.getElementById('md-date').innerText = `${dStr} (รอบ: ${row.round})`;
   document.getElementById('md-score').innerText = `${row.total}/20 (${row.pct}%)`;
   
-  const cls = row.verdict==='PASS' ? 'pass' : row.verdict==='CONDITIONAL' ? 'part' : 'fail';
+  const cls = row.pct>=70 ? 'pass' : row.pct>=60 ? 'part' : 'fail';
   document.getElementById('md-result').innerHTML = `<span class="rb ${cls}">${row.verdict}</span>`;
 
   document.getElementById('md-scores').innerHTML = TOPIC_LABELS.map((lbl, i) => {
@@ -1010,17 +987,14 @@ function editEval(id) {
   setTimeout(()=> window.open(`audit2.html?edit=${id}`, '_blank'), 1000);
 }
 
-// ⬇️ เปลี่ยนโค้ดส่วนนี้ให้ส่งคำสั่งไปยัง Google Sheets ได้จริง
 async function deleteEval(id) {
   if(confirm(`⚠️ ยืนยันการลบประวัติการประเมิน ID: ${id} หรือไม่?\nการกระทำนี้จะลบข้อมูลออกจาก Google Sheets และไม่สามารถกู้คืนได้`)) {
     
     showToast(`กำลังลบข้อมูล ID: ${id} ออกจากฐานข้อมูล...`, 'warning');
     
     try {
-      // ดึง URL หลักของ Apps Script (ลบพารามิเตอร์ ?action=getDashboardData ทิ้ง)
       const baseUrl = API_URL.split('?')[0]; 
       
-      // ส่งคำสั่งแบบ POST ไปที่ Apps Script โดยแนบ action='delete'
       await fetch(baseUrl, {
         method: 'POST',
         mode: 'no-cors',
@@ -1028,12 +1002,10 @@ async function deleteEval(id) {
         body: JSON.stringify({ action: 'delete', id: id })
       });
       
-      // ลบข้อมูลบนหน้าเว็บชั่วคราวให้ UI ตอบสนองผู้ใช้ทันที
       RAW_DATA = RAW_DATA.filter(r => r.id !== id);
       applyFilters();
       showToast(`ส่งคำสั่งลบข้อมูลเรียบร้อยแล้ว`, 'success');
       
-      // หน่วงเวลา 2 วินาที แล้วดึงข้อมูลจาก Google Sheets ใหม่อีกครั้งเพื่ออัปเดตให้ชัวร์
       setTimeout(() => {
         fetchData(true);
       }, 2000);
