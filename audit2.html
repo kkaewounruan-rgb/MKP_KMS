@@ -489,9 +489,8 @@ function calcStats(){
 }
 
 function verdictText(pct){
-  if(pct>=80) return 'PASS (Grade A)';
-  if(pct>=70) return 'PASS (Grade B)';
-  if(pct>=60) return 'CONDITIONAL (ต้องปรับปรุง)';
+  if(pct>=80) return 'PASS (ผ่านเกณฑ์)';
+  if(pct>=60) return 'GradeB(ปรับปรุงบ้างข้อ)';
   return 'FAIL (ไม่ผ่านเกณฑ์)';
 }
 
@@ -503,9 +502,8 @@ function updateBanner(){
   document.getElementById('b-bar').style.width=(ans.length/all.length*100)+'%';
   const vc=document.getElementById('b-verdict');
   if(ans.length<all.length){vc.className='vchip';vc.textContent='กำลังประเมิน...';}
-  else if(pct>=80){vc.className='vchip pass';vc.textContent='✅ ผ่านเกณฑ์ (A)';}
-  else if(pct>=70){vc.className='vchip pass';vc.textContent='✅ ผ่านเกณฑ์ (B)';}
-  else if(pct>=60){vc.className='vchip warn';vc.textContent='⚠️ ต้องปรับปรุง';}
+  else if(pct>=80){vc.className='vchip pass';vc.textContent='✅ ผ่านเกณฑ์';}
+  else if(pct>=60){vc.className='vchip warn';vc.textContent='⚠️ GradeB(ปรับปรุงบ้างข้อ)';}
   else{vc.className='vchip fail';vc.textContent='❌ ไม่ผ่านเกณฑ์';}
 }
 
@@ -519,27 +517,9 @@ function showSum(){
   const vi=document.getElementById('s-vi');
   const vt=document.getElementById('s-vt');
   const vs=document.getElementById('s-vs');
-  
-  if(pct>=80){
-    vb.className='vbox vp';vi.textContent='🌟';
-    vt.textContent='ผลการประเมิน: ผ่านเกณฑ์ ดีเยี่ยม (Grade A)';
-    vs.textContent='Auditor ปฏิบัติหน้าที่ได้ตามมาตรฐานอย่างสมบูรณ์แบบ';
-  }
-  else if(pct>=70){
-    vb.className='vbox vp';vi.textContent='✅';
-    vt.textContent='ผลการประเมิน: ผ่านเกณฑ์ (Grade B)';
-    vs.textContent='Auditor ปฏิบัติหน้าที่ได้ตามมาตรฐาน แต่อาจมีข้อผิดพลาดเล็กน้อย';
-  }
-  else if(pct>=60){
-    vb.className='vbox vw';vi.textContent='⚠️';
-    vt.textContent='ผลการประเมิน: ต่ำกว่าเกณฑ์ (CONDITIONAL)';
-    vs.textContent='กำหนด Action Plan และติดตามผลภายใน 30 วัน';
-  }
-  else{
-    vb.className='vbox vf';vi.textContent='❌';
-    vt.textContent='ผลการประเมิน: ไม่ผ่านเกณฑ์ (FAIL)';
-    vs.textContent='ต้องอบรมซ้ำและประเมินใหม่ภายใน 60 วัน';
-  }
+  if(pct>=80){vb.className='vbox vp';vi.textContent='✅';vt.textContent='ผลการประเมิน: ผ่านเกณฑ์ (PASS)';vs.textContent='Auditor ปฏิบัติหน้าที่ได้ตามมาตรฐาน สามารถปฏิบัติงานได้ต่อเนื่อง';}
+  else if(pct>=60){vb.className='vbox vw';vi.textContent='⚠️';vt.textContent='ผลการประเมิน: GradeB(ปรับปรุงบ้างข้อ)';vs.textContent='กำหนด Action Plan และติดตามผลภายใน 30 วัน';}
+  else{vb.className='vbox vf';vi.textContent='❌';vt.textContent='ผลการประเมิน: ไม่ผ่านเกณฑ์ (FAIL)';vs.textContent='ต้องอบรมซ้ำและประเมินใหม่ภายใน 60 วัน';}
 
   const allItems=DATA.flatMap(s=>s.items);
   const notFull=ans.filter(n=>scores[n]<2);
