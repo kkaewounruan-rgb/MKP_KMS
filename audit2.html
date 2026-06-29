@@ -13,6 +13,7 @@
   --teal2:   #0D9E90;
   --accent:  #E8961A;
   --pass:    #2E7D32; --pass-bg: #E8F5E9;
+  --gradeb:  #689F38; --gradeb-bg: #F1F8E9;
   --part:    #BF6000; --part-bg: #FFF3E0;
   --fail:    #B71C1C; --fail-bg: #FFEBEE;
   --gray-50: #F9FAFB; --gray-100: #F2F4F6;
@@ -59,6 +60,7 @@ body{font-family:'Sarabun',sans-serif;background:var(--gray-100);color:var(--tex
 .vchip{padding:6px 18px;border-radius:20px;font-weight:700;font-size:12px;
   background:var(--gray-200);color:var(--gray-400);transition:all .3s;white-space:nowrap;}
 .vchip.pass{background:var(--pass-bg);color:var(--pass);}
+.vchip.gradeb{background:var(--gradeb-bg);color:var(--gradeb);}
 .vchip.warn{background:var(--part-bg);color:var(--part);}
 .vchip.fail{background:var(--fail-bg);color:var(--fail);}
 
@@ -136,6 +138,7 @@ tr.dr.rf{background:var(--fail-bg);}
   border-left:5px solid var(--gray-200);margin-bottom:14px;
   display:flex;align-items:center;gap:14px;}
 .vbox.vp{border-color:var(--pass);background:var(--pass-bg);}
+.vbox.vg{border-color:var(--gradeb);background:var(--gradeb-bg);}
 .vbox.vw{border-color:var(--part);background:var(--part-bg);}
 .vbox.vf{border-color:var(--fail);background:var(--fail-bg);}
 .vi{font-size:28px;}
@@ -489,9 +492,10 @@ function calcStats(){
 }
 
 function verdictText(pct){
-  if(pct>=80) return 'PASS (ผ่านเกณฑ์)';
-  if(pct>=60) return 'GradeB(ปรับปรุงบ้างข้อ)';
-  return 'FAIL (ไม่ผ่านเกณฑ์)';
+  if(pct>=80) return 'PASS (Grade A)';
+  if(pct>=70) return 'PASS (Grade B)';
+  if(pct>=60) return 'Fail(Grade C)';
+  return 'Fail (Grade D)';
 }
 
 function updateBanner(){
@@ -502,9 +506,10 @@ function updateBanner(){
   document.getElementById('b-bar').style.width=(ans.length/all.length*100)+'%';
   const vc=document.getElementById('b-verdict');
   if(ans.length<all.length){vc.className='vchip';vc.textContent='กำลังประเมิน...';}
-  else if(pct>=80){vc.className='vchip pass';vc.textContent='✅ ผ่านเกณฑ์';}
-  else if(pct>=60){vc.className='vchip warn';vc.textContent='⚠️ GradeB(ปรับปรุงบ้างข้อ)';}
-  else{vc.className='vchip fail';vc.textContent='❌ ไม่ผ่านเกณฑ์';}
+  else if(pct>=80){vc.className='vchip pass';vc.textContent='✅ Grade A';}
+  else if(pct>=70){vc.className='vchip gradeb';vc.textContent='✅ Grade B';}
+  else if(pct>=60){vc.className='vchip warn';vc.textContent='⚠️ Grade C (Fail)';}
+  else{vc.className='vchip fail';vc.textContent='❌ Grade D (Fail)';}
 }
 
 function showSum(){
@@ -517,9 +522,10 @@ function showSum(){
   const vi=document.getElementById('s-vi');
   const vt=document.getElementById('s-vt');
   const vs=document.getElementById('s-vs');
-  if(pct>=80){vb.className='vbox vp';vi.textContent='✅';vt.textContent='ผลการประเมิน: ผ่านเกณฑ์ (PASS)';vs.textContent='Auditor ปฏิบัติหน้าที่ได้ตามมาตรฐาน สามารถปฏิบัติงานได้ต่อเนื่อง';}
-  else if(pct>=60){vb.className='vbox vw';vi.textContent='⚠️';vt.textContent='ผลการประเมิน: GradeB(ปรับปรุงบ้างข้อ)';vs.textContent='กำหนด Action Plan และติดตามผลภายใน 30 วัน';}
-  else{vb.className='vbox vf';vi.textContent='❌';vt.textContent='ผลการประเมิน: ไม่ผ่านเกณฑ์ (FAIL)';vs.textContent='ต้องอบรมซ้ำและประเมินใหม่ภายใน 60 วัน';}
+  if(pct>=80){vb.className='vbox vp';vi.textContent='✅';vt.textContent='ผลการประเมิน: PASS (Grade A)';vs.textContent='Auditor ปฏิบัติหน้าที่ได้ตามมาตรฐาน สามารถปฏิบัติงานได้ต่อเนื่อง';}
+  else if(pct>=70){vb.className='vbox vg';vi.textContent='✅';vt.textContent='ผลการประเมิน: PASS (Grade B)';vs.textContent='ปฏิบัติงานได้ตามเกณฑ์ ควรพัฒนาในบางหัวข้อเพื่อยกระดับสู่ Grade A';}
+  else if(pct>=60){vb.className='vbox vw';vi.textContent='⚠️';vt.textContent='ผลการประเมิน: Fail(Grade C)';vs.textContent='กำหนด Action Plan และติดตามผลภายใน 30 วัน';}
+  else{vb.className='vbox vf';vi.textContent='❌';vt.textContent='ผลการประเมิน: Fail (Grade D)';vs.textContent='ต้องอบรมซ้ำและประเมินใหม่ภายใน 60 วัน';}
 
   const allItems=DATA.flatMap(s=>s.items);
   const notFull=ans.filter(n=>scores[n]<2);
